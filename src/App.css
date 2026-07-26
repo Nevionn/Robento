@@ -19,6 +19,11 @@ body::before {
 	z-index: 100;
 }
 
+.container {
+	width: 100%;
+	height: 100%;
+}
+
 @font-face {
 	font-family: "Russo One";
 	src: url("/src/assets/fonts/RussoOne-Regular.ttf") format("truetype");
