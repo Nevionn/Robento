@@ -1,18 +1,42 @@
+import {
+	DndContext,
+	DragEndEvent,
+	MouseSensor,
+	useSensor,
+	useSensors,
+	closestCenter,
+} from "@dnd-kit/core";
+
+import {
+	SortableContext,
+	arrayMove,
+	rectSortingStrategy,
+	verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+
+import { useState } from "react";
+
 import styles from "./BentoGrid.module.css";
+
+import SortableCard from "./SortableCard";
 
 interface Shortcut {
 	name: string;
 	icon: string;
 }
 
-interface BentoGroup {
+export interface BentoGroup {
+	id: string;
 	title: string;
 	shortcuts: Shortcut[];
 }
 
-const groups: BentoGroup[] = [
+const initialGroups: BentoGroup[] = [
 	{
+		id: "browser",
+
 		title: "Браузеры",
+
 		shortcuts: [
 			{
 				name: "Chrome",
@@ -32,8 +56,12 @@ const groups: BentoGroup[] = [
 			},
 		],
 	},
+
 	{
+		id: "games",
+
 		title: "Игры",
+
 		shortcuts: [
 			{
 				name: "Steam",
@@ -49,8 +77,12 @@ const groups: BentoGroup[] = [
 			},
 		],
 	},
+
 	{
+		id: "work",
+
 		title: "Работа",
+
 		shortcuts: [
 			{
 				name: "VS Code",
@@ -62,8 +94,12 @@ const groups: BentoGroup[] = [
 			},
 		],
 	},
+
 	{
+		id: "media",
+
 		title: "Медиа",
+
 		shortcuts: [
 			{
 				name: "Spotify",
@@ -86,28 +122,49 @@ const groups: BentoGroup[] = [
 ];
 
 function BentoGrid() {
-	return (
-		<section className={styles.grid}>
-			{groups.map((group) => (
-				<div
-					className={`${styles.card} ${styles[group.title]}`}
-					key={group.title}
-				>
-					<header className={styles.header}>
-						<h2>{group.title}</h2>
-					</header>
+	const [groups, setGroups] = useState<BentoGroup[]>(initialGroups);
 
-					<div className={styles.shortcuts}>
-						{group.shortcuts.map((item) => (
-							<button className={styles.shortcut} key={item.name}>
-								<span className={styles.icon}>{item.icon}</span>
-								<span>{item.name}</span>
-							</button>
-						))}
-					</div>
-				</div>
-			))}
-		</section>
+	const sensors = useSensors(
+		useSensor(MouseSensor, {
+			activationConstraint: {
+				distance: 10,
+			},
+		}),
+	);
+
+	function handleDragEnd(event: DragEndEvent) {
+		const { active, over } = event;
+
+		if (!over || active.id === over.id) {
+			return;
+		}
+
+		setGroups((items) => {
+			const oldIndex = items.findIndex((item) => item.id === active.id);
+
+			const newIndex = items.findIndex((item) => item.id === over.id);
+
+			return arrayMove(items, oldIndex, newIndex);
+		});
+	}
+
+	return (
+		<DndContext
+			sensors={sensors}
+			collisionDetection={closestCenter}
+			onDragEnd={handleDragEnd}
+		>
+			<SortableContext
+				items={groups.map((item) => item.id)}
+				strategy={verticalListSortingStrategy}
+			>
+				<section className={styles.grid}>
+					{groups.map((group) => (
+						<SortableCard key={group.id} group={group} />
+					))}
+				</section>
+			</SortableContext>
+		</DndContext>
 	);
 }
 
