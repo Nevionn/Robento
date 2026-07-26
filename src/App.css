@@ -2,9 +2,51 @@ html,
 body {
 	margin: 0;
 	padding: 0;
-
-	background-color: black;
-	background-repeat: no-repeat;
-	background-attachment: fixed;
+	width: 100%;
+	height: 100%;
+	background-color: #1e1e2e; /* Catppuccin Mocha */
+	font-family: var(--font-general);
 	scroll-behavior: smooth;
+}
+
+body::before {
+	content: "";
+	position: fixed;
+	inset: 0;
+	border: 1px solid rgba(108, 112, 134, 0.45); /* Overlay0 */
+	box-shadow: inset 0 0 20px rgba(17, 17, 27, 0.35);
+	pointer-events: none;
+	z-index: 100;
+}
+
+@font-face {
+	font-family: "Russo One";
+	src: url("/src/assets/fonts/RussoOne-Regular.ttf") format("truetype");
+	font-weight: 400;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: "Impact Regular";
+	src: url("/src/assets/fonts/Impact Regular.ttf") format("truetype");
+	font-weight: 400;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: "WDXL Lubrifont TC";
+	src: url("/src/assets/fonts/WDXLLubrifontTC-Regular.ttf") format("truetype");
+	font-weight: 400;
+	font-style: normal;
+}
+
+:root {
+	/* Шрифты */
+	--font-general: "Russo One", sans-serif;
+	--font-description: "WDXL Lubrifont TC", sans-serif;
+	--font-title: "Impact Regular", sans-serif;
+
+	--text-primary: #cdd6f4;
+	--text-secondary: #bac2de;
+	--text-muted: #a6adc8;
 }
