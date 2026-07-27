@@ -8,10 +8,9 @@ import {
 } from "@dnd-kit/core";
 
 import {
-	SortableContext,
 	arrayMove,
 	rectSortingStrategy,
-	verticalListSortingStrategy,
+	SortableContext,
 } from "@dnd-kit/sortable";
 
 import { useState } from "react";
@@ -34,7 +33,6 @@ export interface BentoGroup {
 const initialGroups: BentoGroup[] = [
 	{
 		id: "browser",
-
 		title: "Браузеры",
 
 		shortcuts: [
@@ -46,20 +44,11 @@ const initialGroups: BentoGroup[] = [
 				name: "Firefox",
 				icon: "🦊",
 			},
-			{
-				name: "Edge",
-				icon: "🔷",
-			},
-			{
-				name: "Waterfox",
-				icon: "🔷",
-			},
 		],
 	},
 
 	{
 		id: "games",
-
 		title: "Игры",
 
 		shortcuts: [
@@ -80,7 +69,6 @@ const initialGroups: BentoGroup[] = [
 
 	{
 		id: "work",
-
 		title: "Работа",
 
 		shortcuts: [
@@ -97,7 +85,6 @@ const initialGroups: BentoGroup[] = [
 
 	{
 		id: "media",
-
 		title: "Медиа",
 
 		shortcuts: [
@@ -121,7 +108,7 @@ const initialGroups: BentoGroup[] = [
 	},
 ];
 
-function BentoGrid() {
+export default function BentoGrid() {
 	const [groups, setGroups] = useState<BentoGroup[]>(initialGroups);
 
 	const sensors = useSensors(
@@ -155,8 +142,8 @@ function BentoGrid() {
 			onDragEnd={handleDragEnd}
 		>
 			<SortableContext
-				items={groups.map((item) => item.id)}
-				strategy={verticalListSortingStrategy}
+				items={groups.map((group) => group.id)}
+				strategy={rectSortingStrategy}
 			>
 				<section className={styles.grid}>
 					{groups.map((group) => (
@@ -167,5 +154,3 @@ function BentoGrid() {
 		</DndContext>
 	);
 }
-
-export default BentoGrid;

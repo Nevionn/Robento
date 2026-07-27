@@ -25,11 +25,11 @@ export default function SortableCard({ group }: Props) {
 	const style = {
 		transform: CSS.Transform.toString(transform),
 
-		transition: transition ?? "transform 250ms cubic-bezier(0.25, 1, 0.5, 1)",
+		transition: transition ?? "transform 200ms ease",
 
 		zIndex: isDragging ? 10 : undefined,
 
-		opacity: isDragging ? 0.7 : 1,
+		opacity: isDragging ? 0.6 : 1,
 	};
 
 	return (
