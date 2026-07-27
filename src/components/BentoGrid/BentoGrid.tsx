@@ -1,103 +1,192 @@
 import { useState } from "react";
+
 import ReactGridLayout, {
 	type Layout,
 	useContainerWidth,
 } from "react-grid-layout";
+
 import "react-grid-layout/css/styles.css";
+
+import ShortcutGrid from "../ShortcutGrid/ShortcutGrid";
 import styles from "./BentoGrid.module.css";
 
-interface Shortcut {
+export interface Shortcut {
+	id: string;
 	name: string;
 	icon: string;
 }
 
-interface BentoGroup {
+export interface BentoGroup {
 	id: string;
 	title: string;
 	shortcuts: Shortcut[];
 }
 
-const groups: BentoGroup[] = [
+const initialGroups: BentoGroup[] = [
 	{
 		id: "browser",
 		title: "Браузеры",
 		shortcuts: [
-			{ name: "Chrome", icon: "🌐" },
-			{ name: "Firefox", icon: "🦊" },
-			{ name: "Edge", icon: "🔷" },
-			{ name: "Waterfox", icon: "🔷" },
-			{ name: "librewolf", icon: "🔷" },
+			{
+				id: "chrome",
+				name: "Chrome",
+				icon: "🌐",
+			},
+			{
+				id: "firefox",
+				name: "Firefox",
+				icon: "🦊",
+			},
+			{
+				id: "edge",
+				name: "Edge",
+				icon: "🔷",
+			},
+			{
+				id: "waterfox",
+				name: "Waterfox",
+				icon: "🔷",
+			},
+			{
+				id: "librewolf",
+				name: "LibreWolf",
+				icon: "🔷",
+			},
 		],
 	},
 	{
 		id: "games",
 		title: "Игры",
 		shortcuts: [
-			{ name: "Steam", icon: "🎮" },
-			{ name: "Minecraft", icon: "⛏️" },
-			{ name: "Wow", icon: "⚔️" },
+			{
+				id: "steam",
+				name: "Steam",
+				icon: "🎮",
+			},
+			{
+				id: "minecraft",
+				name: "Minecraft",
+				icon: "⛏️",
+			},
+			{
+				id: "wow",
+				name: "Wow",
+				icon: "⚔️",
+			},
 		],
 	},
 	{
 		id: "work",
 		title: "Работа",
 		shortcuts: [
-			{ name: "VS Code", icon: "💻" },
-			{ name: "Figma", icon: "🎨" },
+			{
+				id: "vscode",
+				name: "VS Code",
+				icon: "💻",
+			},
+			{
+				id: "figma",
+				name: "Figma",
+				icon: "🎨",
+			},
 		],
 	},
 	{
 		id: "media",
 		title: "Медиа",
 		shortcuts: [
-			{ name: "Spotify", icon: "🎵" },
-			{ name: "YouTube", icon: "▶️" },
-			{ name: "Discord", icon: "💬" },
-			{ name: "Photos", icon: "🖼️" },
+			{
+				id: "spotify",
+				name: "Spotify",
+				icon: "🎵",
+			},
+			{
+				id: "youtube",
+				name: "YouTube",
+				icon: "▶️",
+			},
+			{
+				id: "discord",
+				name: "Discord",
+				icon: "💬",
+			},
+			{
+				id: "photos",
+				name: "Photos",
+				icon: "🖼️",
+			},
 		],
 	},
 ];
 
-/** Сколько рядов нужно под N ярлыков (2 в ряд) */
-function calcH(count: number): number {
-	return Math.max(1, Math.ceil(count / 2));
-}
-
-/** Генерируем layout: кладём каждую группу в более низкую колонку */
-function generateLayout(groups: BentoGroup[]): Layout {
-	const colY = [0, 0];
-
-	return groups.map((group) => {
-		const h = calcH(group.shortcuts.length);
-		const col = colY[0] <= colY[1] ? 0 : 1;
-		const y = colY[col];
-		colY[col] += h;
-
-		return { i: group.id, x: col, y, w: 1, h };
-	});
-}
+/**
+ * Основной компонент Bento-сетки.
+ *
+ * Поддерживает:
+ * - drag & drop карточек;
+ * - изменение порядка ярлыков;
+ * - динамический расчёт размеров карточек.
+ *
+ * Использует:
+ * - react-grid-layout — для перемещения карточек групп;
+ * - ShortcutGrid — для сортировки ярлыков внутри групп.
+ *
+ * Отвечает за:
+ * - отображение групп ярлыков в двухколоночном grid layout;
+ * - управление позициями карточек через react-grid-layout;
+ * - хранение состояния групп и порядка ярлыков внутри них;
+ * - передачу управления сортировкой ярлыков в ShortcutGrid.
+ *
+ */
 
 export default function BentoGrid() {
 	const { width, containerRef, mounted } = useContainerWidth();
 
-	// layout пересчитывается при изменении groups
-	const initialLayout = generateLayout(groups);
-	const [layout, setLayout] = useState<Layout>(initialLayout);
+	const [groups, setGroups] = useState(initialGroups);
 
-	// если groups изменятся снаружи — обновляем высоты, сохраняя позиции
-	// (в будущем, когда список станет динамическим)
-	// useEffect(() => {
-	//     setLayout((prev) => {
-	//         const byId = Object.fromEntries(prev.map((item) => [item.i, item]));
-	//         return groups.map((g) => {
-	//             const old = byId[g.id];
-	//             const h = calcH(g.shortcuts.length);
-	//             return old
-	//                 ? { ...old, h }
-	//                 : { i: g.id, x: 0, y: 0, w: 1, h };
-	//         });
-	//     });
-	// }, [groups]);
+	const [layout, setLayout] = useState<Layout>(generateLayout(initialGroups));
+
+	/**
+	 * Вычисляет необходимую высоту карточки в grid-ячейках.
+	 *
+	 * Расчёт основан на двухколоночном расположении ярлыков:
+	 * каждые два элемента занимают один ряд.
+	 */
+
+	function calcH(count: number): number {
+		return Math.max(1, Math.ceil(count / 2));
+	}
+
+	/**
+	 * Генерирует начальную раскладку карточек Bento-сетки.
+	 *
+	 * Распределяет группы между двумя колонками,
+	 * стараясь сохранять одинаковую высоту колонок.
+	 *
+	 * Возвращает layout, совместимый с react-grid-layout.
+	 */
+
+	function generateLayout(groups: BentoGroup[]): Layout {
+		const colY = [0, 0];
+
+		return groups.map((group) => {
+			const h = calcH(group.shortcuts.length);
+
+			const col = colY[0] <= colY[1] ? 0 : 1;
+
+			const y = colY[col];
+
+			colY[col] += h;
+
+			return {
+				i: group.id,
+				x: col,
+				y,
+				w: 1,
+				h,
+			};
+		});
+	}
 
 	return (
 		<section ref={containerRef} className={styles.wrapper}>
@@ -118,20 +207,32 @@ export default function BentoGrid() {
 					resizeConfig={{
 						enabled: false,
 					}}
-					onLayoutChange={(next) => setLayout([...next])}
+					onLayoutChange={(next) => {
+						setLayout([...next]);
+					}}
 				>
 					{groups.map((group) => (
 						<div key={group.id} className={styles.card}>
 							<header className={styles.header}>
 								<h2>{group.title}</h2>
 							</header>
+
 							<div className={styles.shortcuts}>
-								{group.shortcuts.map((item) => (
-									<button key={item.name} className={styles.shortcut}>
-										<span className={styles.icon}>{item.icon}</span>
-										<span>{item.name}</span>
-									</button>
-								))}
+								<ShortcutGrid
+									shortcuts={group.shortcuts}
+									onChange={(shortcuts) => {
+										setGroups((prev) =>
+											prev.map((g) =>
+												g.id === group.id
+													? {
+															...g,
+															shortcuts,
+														}
+													: g,
+											),
+										);
+									}}
+								/>
 							</div>
 						</div>
 					))}

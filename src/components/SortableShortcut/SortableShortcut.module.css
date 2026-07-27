@@ -1,0 +1,60 @@
+.shortcut {
+	width: 100%;
+
+	aspect-ratio: 1 / 1;
+
+	display: flex;
+
+	flex-direction: column;
+
+	align-items: center;
+
+	justify-content: center;
+
+	gap: 8px;
+
+	border: none;
+
+	border-radius: 16px;
+
+	background: #45475a;
+
+	color: #bac2de;
+
+	font-family: inherit;
+
+	font-size: 13px;
+
+	font-weight: 600;
+
+	cursor: grab;
+
+	user-select: none;
+
+	touch-action: none;
+
+	will-change: transform;
+
+	transition:
+		background 160ms ease,
+		transform 160ms ease;
+}
+
+
+.shortcut:active {
+	cursor: grabbing;
+}
+
+
+.shortcut:hover {
+	background: #585b70;
+
+	color: #cdd6f4;
+}
+
+
+.icon {
+	font-size: 26px;
+
+	line-height: 1;
+}
