@@ -7,6 +7,7 @@ body {
 	background-color: #1e1e2e; /* Catppuccin Mocha */
 	font-family: var(--font-general);
 	scroll-behavior: smooth;
+	scrollbar-color: var(--color-scroll-bar);
 }
 
 body::before {
@@ -54,4 +55,6 @@ body::before {
 	--text-primary: #cdd6f4;
 	--text-secondary: #bac2de;
 	--text-muted: #a6adc8;
+
+	--color-scroll-bar: #313244 #1e1e2e;
 }
