@@ -8,14 +8,14 @@ import {
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import type { Layout } from "react-grid-layout";
 import ReactGridLayout, { useContainerWidth } from "react-grid-layout";
 
 import "react-grid-layout/css/styles.css";
 
-import ShortcutGrid from "../ShortcutGrid/ShortcutGrid";
+import BentoGroupCard from "../BentoGroupCard/BentoGroupCard";
 import styles from "./BentoGrid.module.css";
 
 export interface Shortcut {
@@ -28,48 +28,10 @@ export interface BentoGroup {
 	id: string;
 	title: string;
 	shortcuts: Shortcut[];
+	isEditing?: boolean;
 }
 
-const initialGroups: BentoGroup[] = [
-	{
-		id: "browser",
-		title: "Браузеры",
-		shortcuts: [
-			{ id: "chrome", name: "Chrome", icon: "🌐" },
-			{ id: "firefox", name: "Firefox", icon: "🦊" },
-			{ id: "edge", name: "Edge", icon: "🔷" },
-			{ id: "waterfox", name: "Waterfox", icon: "🔷" },
-			{ id: "librewolf", name: "LibreWolf", icon: "🔷" },
-		],
-	},
-	{
-		id: "games",
-		title: "Игры",
-		shortcuts: [
-			{ id: "steam", name: "Steam", icon: "🎮" },
-			{ id: "minecraft", name: "Minecraft", icon: "⛏️" },
-			{ id: "wow", name: "Wow", icon: "⚔️" },
-		],
-	},
-	{
-		id: "work",
-		title: "Работа",
-		shortcuts: [
-			{ id: "vscode", name: "VS Code", icon: "💻" },
-			{ id: "figma", name: "Figma", icon: "🎨" },
-		],
-	},
-	{
-		id: "media",
-		title: "Медиа",
-		shortcuts: [
-			{ id: "spotify", name: "Spotify", icon: "🎵" },
-			{ id: "youtube", name: "YouTube", icon: "▶️" },
-			{ id: "discord", name: "Discord", icon: "💬" },
-			{ id: "photos", name: "Photos", icon: "🖼️" },
-		],
-	},
-];
+const initialGroups: BentoGroup[] = [];
 
 /**
  * Вычисляет необходимую высоту карточки в grid-ячейках.
@@ -143,8 +105,65 @@ export default function BentoGrid() {
 	const { width, containerRef, mounted } = useContainerWidth();
 
 	const [groups, setGroups] = useState(initialGroups);
+	const [focusedGroupId, setFocusedGroupId] = useState<string | null>(null);
 
 	const [layout, setLayout] = useState<Layout>(generateLayout(initialGroups));
+
+	function createGroup() {
+		const group: BentoGroup = {
+			id: crypto.randomUUID(),
+			title: "",
+			shortcuts: [],
+			isEditing: true,
+		};
+
+		setGroups((prev) => {
+			const next = [...prev, group];
+
+			setLayout(generateLayout(next));
+
+			return next;
+		});
+	}
+
+	function handleGroupTitleChange(id: string, title: string) {
+		setGroups((prev) =>
+			prev.map((group) =>
+				group.id === id
+					? {
+							...group,
+							title,
+						}
+					: group,
+			),
+		);
+	}
+
+	function handleFinishEditing(id: string) {
+		setGroups((prev) =>
+			prev.map((group) =>
+				group.id === id
+					? {
+							...group,
+							isEditing: false,
+						}
+					: group,
+			),
+		);
+	}
+
+	function startEditingGroup(id: string) {
+		setGroups((prev) =>
+			prev.map((group) =>
+				group.id === id
+					? {
+							...group,
+							isEditing: true,
+						}
+					: group,
+			),
+		);
+	}
 
 	const sensors = useSensors(
 		useSensor(MouseSensor, {
@@ -153,6 +172,31 @@ export default function BentoGrid() {
 			},
 		}),
 	);
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	useEffect(() => {
+		function handleKeyDown(event: KeyboardEvent) {
+			if (event.repeat) {
+				return;
+			}
+
+			if (event.shiftKey && event.key.toLowerCase() === "g") {
+				event.preventDefault();
+				createGroup();
+			}
+
+			if (event.key === "r" && focusedGroupId) {
+				event.preventDefault();
+				startEditingGroup(focusedGroupId);
+			}
+		}
+
+		window.addEventListener("keydown", handleKeyDown);
+
+		return () => {
+			window.removeEventListener("keydown", handleKeyDown);
+		};
+	}, [focusedGroupId]);
 
 	function handleShortcutDragEnd(event: DragEndEvent) {
 		const { active, over } = event;
@@ -260,17 +304,13 @@ export default function BentoGrid() {
 						onLayoutChange={(next) => setLayout([...next])}
 					>
 						{groups.map((group) => (
-							<div key={group.id} className={styles.card}>
-								<header className={styles.header}>
-									<h2>{group.title}</h2>
-								</header>
-
-								<div className={styles.shortcuts}>
-									<ShortcutGrid
-										groupId={group.id}
-										shortcuts={group.shortcuts}
-									/>
-								</div>
+							<div key={group.id}>
+								<BentoGroupCard
+									group={group}
+									onTitleChange={handleGroupTitleChange}
+									onFinishEditing={handleFinishEditing}
+									onFocus={() => setFocusedGroupId(group.id)}
+								/>
 							</div>
 						))}
 					</ReactGridLayout>

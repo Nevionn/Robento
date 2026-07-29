@@ -27,6 +27,11 @@
 	border-color: rgba(205, 214, 244, 0.35);
 }
 
+.card:focus-visible {
+	outline: 2px solid rgb(58, 58, 154);
+	outline-offset: 4px;
+}
+
 .header {
 	flex-shrink: 0;
 	user-select: none;
