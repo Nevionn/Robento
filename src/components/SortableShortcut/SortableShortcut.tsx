@@ -1,6 +1,5 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-
 import styles from "../BentoGrid/BentoGrid.module.css";
 
 interface Props {
@@ -10,10 +9,10 @@ interface Props {
 }
 
 /**
- * Компонент отдельного ярлыка.
+ * Отдельный перетаскиваемый ярлык.
  *
- * Представляет элемент, поддерживающий drag & drop
- * внутри родительской сетки ярлыков через dnd-kit.
+ * Поддерживает перенос между группами
+ * через общий DndContext.
  */
 
 export default function SortableShortcut({ id, name, icon }: Props) {
@@ -32,8 +31,7 @@ export default function SortableShortcut({ id, name, icon }: Props) {
 				transform: CSS.Transform.toString(transform),
 				transition: "none",
 				opacity: isDragging ? 0.5 : 1,
-				zIndex: isDragging ? 100 : undefined,
-				position: isDragging ? "relative" : undefined,
+				zIndex: isDragging ? 10 : undefined,
 			}}
 		>
 			<span className={styles.icon}>{icon}</span>

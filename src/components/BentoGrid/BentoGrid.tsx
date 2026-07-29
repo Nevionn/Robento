@@ -1,9 +1,17 @@
+import type { DragEndEvent } from "@dnd-kit/core";
+import {
+	closestCenter,
+	DndContext,
+	MouseSensor,
+	useSensor,
+	useSensors,
+} from "@dnd-kit/core";
+import { arrayMove } from "@dnd-kit/sortable";
+
 import { useState } from "react";
 
-import ReactGridLayout, {
-	type Layout,
-	useContainerWidth,
-} from "react-grid-layout";
+import type { Layout } from "react-grid-layout";
+import ReactGridLayout, { useContainerWidth } from "react-grid-layout";
 
 import "react-grid-layout/css/styles.css";
 
@@ -27,116 +35,108 @@ const initialGroups: BentoGroup[] = [
 		id: "browser",
 		title: "Браузеры",
 		shortcuts: [
-			{
-				id: "chrome",
-				name: "Chrome",
-				icon: "🌐",
-			},
-			{
-				id: "firefox",
-				name: "Firefox",
-				icon: "🦊",
-			},
-			{
-				id: "edge",
-				name: "Edge",
-				icon: "🔷",
-			},
-			{
-				id: "waterfox",
-				name: "Waterfox",
-				icon: "🔷",
-			},
-			{
-				id: "librewolf",
-				name: "LibreWolf",
-				icon: "🔷",
-			},
+			{ id: "chrome", name: "Chrome", icon: "🌐" },
+			{ id: "firefox", name: "Firefox", icon: "🦊" },
+			{ id: "edge", name: "Edge", icon: "🔷" },
+			{ id: "waterfox", name: "Waterfox", icon: "🔷" },
+			{ id: "librewolf", name: "LibreWolf", icon: "🔷" },
 		],
 	},
 	{
 		id: "games",
 		title: "Игры",
 		shortcuts: [
-			{
-				id: "steam",
-				name: "Steam",
-				icon: "🎮",
-			},
-			{
-				id: "minecraft",
-				name: "Minecraft",
-				icon: "⛏️",
-			},
-			{
-				id: "wow",
-				name: "Wow",
-				icon: "⚔️",
-			},
+			{ id: "steam", name: "Steam", icon: "🎮" },
+			{ id: "minecraft", name: "Minecraft", icon: "⛏️" },
+			{ id: "wow", name: "Wow", icon: "⚔️" },
 		],
 	},
 	{
 		id: "work",
 		title: "Работа",
 		shortcuts: [
-			{
-				id: "vscode",
-				name: "VS Code",
-				icon: "💻",
-			},
-			{
-				id: "figma",
-				name: "Figma",
-				icon: "🎨",
-			},
+			{ id: "vscode", name: "VS Code", icon: "💻" },
+			{ id: "figma", name: "Figma", icon: "🎨" },
 		],
 	},
 	{
 		id: "media",
 		title: "Медиа",
 		shortcuts: [
-			{
-				id: "spotify",
-				name: "Spotify",
-				icon: "🎵",
-			},
-			{
-				id: "youtube",
-				name: "YouTube",
-				icon: "▶️",
-			},
-			{
-				id: "discord",
-				name: "Discord",
-				icon: "💬",
-			},
-			{
-				id: "photos",
-				name: "Photos",
-				icon: "🖼️",
-			},
+			{ id: "spotify", name: "Spotify", icon: "🎵" },
+			{ id: "youtube", name: "YouTube", icon: "▶️" },
+			{ id: "discord", name: "Discord", icon: "💬" },
+			{ id: "photos", name: "Photos", icon: "🖼️" },
 		],
 	},
 ];
 
 /**
- * Основной компонент Bento-сетки.
+ * Вычисляет необходимую высоту карточки в grid-ячейках.
  *
- * Поддерживает:
- * - drag & drop карточек;
- * - изменение порядка ярлыков;
- * - динамический расчёт размеров карточек.
+ * Расчёт основан на двухколоночном расположении ярлыков:
+ * каждые два элемента занимают один ряд.
+ */
+
+function calcH(count: number) {
+	return Math.max(1, Math.ceil(count / 2));
+}
+
+/**
+ * Генерирует начальную раскладку карточек Bento-сетки.
  *
- * Использует:
- * - react-grid-layout — для перемещения карточек групп;
- * - ShortcutGrid — для сортировки ярлыков внутри групп.
+ * Распределяет группы между двумя колонками,
+ * стараясь сохранять одинаковую высоту колонок.
+ *
+ * Возвращает layout, совместимый с react-grid-layout.
+ */
+
+function generateLayout(groups: BentoGroup[]): Layout {
+	const colY = [0, 0];
+
+	return groups.map((group) => {
+		const h = calcH(group.shortcuts.length);
+
+		const col = colY[0] <= colY[1] ? 0 : 1;
+		const y = colY[col];
+
+		colY[col] += h;
+
+		return {
+			i: group.id,
+			x: col,
+			y,
+			w: 1,
+			h,
+		};
+	});
+}
+
+function updateLayoutHeight(groups: BentoGroup[], layout: Layout): Layout {
+	return layout.map((item) => {
+		const group = groups.find((group) => group.id === item.i);
+
+		if (!group) {
+			return item;
+		}
+
+		return {
+			...item,
+			h: calcH(group.shortcuts.length),
+		};
+	});
+}
+
+/**
+ * Главный контейнер Bento-сетки.
  *
  * Отвечает за:
- * - отображение групп ярлыков в двухколоночном grid layout;
- * - управление позициями карточек через react-grid-layout;
- * - хранение состояния групп и порядка ярлыков внутри них;
- * - передачу управления сортировкой ярлыков в ShortcutGrid.
- *
+ * - хранение групп;
+ * - отображение Bento-карточек;
+ * - перемещение ярлыков;
+ * - перенос ярлыков между группами;
+ * - сортировку ярлыков внутри группы;
+ * - перерасчёт высоты групп после изменения содержимого.
  */
 
 export default function BentoGrid() {
@@ -146,97 +146,135 @@ export default function BentoGrid() {
 
 	const [layout, setLayout] = useState<Layout>(generateLayout(initialGroups));
 
-	/**
-	 * Вычисляет необходимую высоту карточки в grid-ячейках.
-	 *
-	 * Расчёт основан на двухколоночном расположении ярлыков:
-	 * каждые два элемента занимают один ряд.
-	 */
+	const sensors = useSensors(
+		useSensor(MouseSensor, {
+			activationConstraint: {
+				distance: 8,
+			},
+		}),
+	);
 
-	function calcH(count: number): number {
-		return Math.max(1, Math.ceil(count / 2));
-	}
+	function handleShortcutDragEnd(event: DragEndEvent) {
+		const { active, over } = event;
 
-	/**
-	 * Генерирует начальную раскладку карточек Bento-сетки.
-	 *
-	 * Распределяет группы между двумя колонками,
-	 * стараясь сохранять одинаковую высоту колонок.
-	 *
-	 * Возвращает layout, совместимый с react-grid-layout.
-	 */
+		if (!over || active.id === over.id) {
+			return;
+		}
 
-	function generateLayout(groups: BentoGroup[]): Layout {
-		const colY = [0, 0];
+		let sourceId: string | undefined;
+		let targetId: string | undefined;
 
-		return groups.map((group) => {
-			const h = calcH(group.shortcuts.length);
+		groups.forEach((group) => {
+			if (group.shortcuts.some((item) => item.id === active.id)) {
+				sourceId = group.id;
+			}
 
-			const col = colY[0] <= colY[1] ? 0 : 1;
+			if (group.shortcuts.some((item) => item.id === over.id)) {
+				targetId = group.id;
+			}
+		});
 
-			const y = colY[col];
+		if (!sourceId || !targetId) {
+			return;
+		}
 
-			colY[col] += h;
+		setGroups((prev) => {
+			const copy = structuredClone(prev);
 
-			return {
-				i: group.id,
-				x: col,
-				y,
-				w: 1,
-				h,
-			};
+			const source = copy.find((group) => group.id === sourceId);
+
+			const target = copy.find((group) => group.id === targetId);
+
+			if (!source || !target) {
+				return prev;
+			}
+
+			const oldIndex = source.shortcuts.findIndex(
+				(item) => item.id === active.id,
+			);
+
+			if (oldIndex === -1) {
+				return prev;
+			}
+
+			// сортировка внутри группы
+
+			if (sourceId === targetId) {
+				const newIndex = source.shortcuts.findIndex(
+					(item) => item.id === over.id,
+				);
+
+				if (newIndex === -1) {
+					return prev;
+				}
+
+				source.shortcuts = arrayMove(source.shortcuts, oldIndex, newIndex);
+
+				return copy;
+			}
+
+			// перенос между группами
+
+			const [item] = source.shortcuts.splice(oldIndex, 1);
+
+			const targetIndex = target.shortcuts.findIndex(
+				(item) => item.id === over.id,
+			);
+
+			if (targetIndex === -1) {
+				target.shortcuts.push(item);
+			} else {
+				target.shortcuts.splice(targetIndex, 0, item);
+			}
+
+			setLayout((current) => updateLayoutHeight(copy, current));
+
+			return copy;
 		});
 	}
 
 	return (
 		<section ref={containerRef} className={styles.wrapper}>
 			{mounted && (
-				<ReactGridLayout
-					width={width}
-					layout={layout}
-					gridConfig={{
-						cols: 2,
-						rowHeight: 140,
-						margin: [16, 16],
-						containerPadding: [0, 0],
-					}}
-					dragConfig={{
-						enabled: true,
-						cancel: "button, .shortcut",
-					}}
-					resizeConfig={{
-						enabled: false,
-					}}
-					onLayoutChange={(next) => {
-						setLayout([...next]);
-					}}
+				<DndContext
+					sensors={sensors}
+					collisionDetection={closestCenter}
+					onDragEnd={handleShortcutDragEnd}
 				>
-					{groups.map((group) => (
-						<div key={group.id} className={styles.card}>
-							<header className={styles.header}>
-								<h2>{group.title}</h2>
-							</header>
+					<ReactGridLayout
+						width={width}
+						layout={layout}
+						gridConfig={{
+							cols: 2,
+							rowHeight: 140,
+							margin: [16, 16],
+							containerPadding: [0, 0],
+						}}
+						dragConfig={{
+							enabled: true,
+							cancel: "button",
+						}}
+						resizeConfig={{
+							enabled: false,
+						}}
+						onLayoutChange={(next) => setLayout([...next])}
+					>
+						{groups.map((group) => (
+							<div key={group.id} className={styles.card}>
+								<header className={styles.header}>
+									<h2>{group.title}</h2>
+								</header>
 
-							<div className={styles.shortcuts}>
-								<ShortcutGrid
-									shortcuts={group.shortcuts}
-									onChange={(shortcuts) => {
-										setGroups((prev) =>
-											prev.map((g) =>
-												g.id === group.id
-													? {
-															...g,
-															shortcuts,
-														}
-													: g,
-											),
-										);
-									}}
-								/>
+								<div className={styles.shortcuts}>
+									<ShortcutGrid
+										groupId={group.id}
+										shortcuts={group.shortcuts}
+									/>
+								</div>
 							</div>
-						</div>
-					))}
-				</ReactGridLayout>
+						))}
+					</ReactGridLayout>
+				</DndContext>
 			)}
 		</section>
 	);
