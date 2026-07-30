@@ -21,7 +21,8 @@ import styles from "./BentoGrid.module.css";
 export interface Shortcut {
 	id: string;
 	name: string;
-	icon: string;
+	path: string;
+	icon?: string;
 }
 
 export interface BentoGroup {
