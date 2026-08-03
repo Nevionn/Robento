@@ -1,12 +1,6 @@
 import { rectSortingStrategy, SortableContext } from "@dnd-kit/sortable";
-
+import type { Shortcut } from "../BentoGrid/BentoGrid";
 import SortableShortcut from "../SortableShortcut/SortableShortcut";
-
-export interface Shortcut {
-	id: string;
-	name: string;
-	icon: string;
-}
 
 interface Props {
 	groupId: string;
@@ -25,10 +19,9 @@ interface Props {
  * родительским DndContext.
  */
 
-export default function ShortcutGrid({ groupId, shortcuts }: Props) {
+export default function ShortcutGrid({ shortcuts }: Props) {
 	return (
 		<SortableContext
-			id={groupId}
 			items={shortcuts.map((item) => item.id)}
 			strategy={rectSortingStrategy}
 		>

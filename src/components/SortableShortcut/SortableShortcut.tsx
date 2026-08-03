@@ -5,7 +5,7 @@ import styles from "../BentoGrid/BentoGrid.module.css";
 interface Props {
 	id: string;
 	name: string;
-	icon: string;
+	icon: string | null;
 }
 
 /**
@@ -26,7 +26,7 @@ export default function SortableShortcut({ id, name, icon }: Props) {
 			ref={setNodeRef}
 			{...attributes}
 			{...listeners}
-			className={styles.shortcut}
+			className={`${styles.shortcut} shortcut-drag`}
 			style={{
 				transform: CSS.Transform.toString(transform),
 				transition: "none",
@@ -34,7 +34,11 @@ export default function SortableShortcut({ id, name, icon }: Props) {
 				zIndex: isDragging ? 10 : undefined,
 			}}
 		>
-			<span className={styles.icon}>{icon}</span>
+			{icon ? (
+				<img src={icon} className={styles.icon} />
+			) : (
+				<div className={styles.icon} />
+			)}
 
 			<span>{name}</span>
 		</button>

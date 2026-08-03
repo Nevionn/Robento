@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/correctness/useExhaustiveDependencies: <explanation> */
 import type { DragEndEvent } from "@dnd-kit/core";
 import {
 	closestCenter,
@@ -7,8 +8,10 @@ import {
 	useSensors,
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
+import { invoke } from "@tauri-apps/api/core";
+import { getCurrentWebview } from "@tauri-apps/api/webview";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { Layout } from "react-grid-layout";
 import ReactGridLayout, { useContainerWidth } from "react-grid-layout";
@@ -21,8 +24,9 @@ import styles from "./BentoGrid.module.css";
 export interface Shortcut {
 	id: string;
 	name: string;
-	path: string;
-	icon?: string;
+	target: string;
+	source: string;
+	icon: string | null;
 }
 
 export interface BentoGroup {
@@ -75,6 +79,10 @@ function generateLayout(groups: BentoGroup[]): Layout {
 	});
 }
 
+/**
+ * Перерасчет высоты после добавления нового ярлыка в группу.
+ */
+
 function updateLayoutHeight(groups: BentoGroup[], layout: Layout): Layout {
 	return layout.map((item) => {
 		const group = groups.find((group) => group.id === item.i);
@@ -107,6 +115,10 @@ export default function BentoGrid() {
 
 	const [groups, setGroups] = useState(initialGroups);
 	const [focusedGroupId, setFocusedGroupId] = useState<string | null>(null);
+	const [dropTargetGroup, setDropTargetGroup] = useState<string | null>(null);
+	const [isDraggingShortcut, setIsDraggingShortcut] = useState(false);
+
+	const dropTargetGroupRef = useRef<string | null>(null);
 
 	const [layout, setLayout] = useState<Layout>(generateLayout(initialGroups));
 
@@ -166,6 +178,23 @@ export default function BentoGrid() {
 		);
 	}
 
+	function addShortcutToGroup(groupId: string, shortcut: Shortcut) {
+		setGroups((prev) => {
+			const next = prev.map((group) =>
+				group.id === groupId
+					? {
+							...group,
+							shortcuts: [...group.shortcuts, shortcut],
+						}
+					: group,
+			);
+
+			setLayout((current) => updateLayoutHeight(next, current));
+
+			return next;
+		});
+	}
+
 	const sensors = useSensors(
 		useSensor(MouseSensor, {
 			activationConstraint: {
@@ -202,7 +231,7 @@ export default function BentoGrid() {
 	function handleShortcutDragEnd(event: DragEndEvent) {
 		const { active, over } = event;
 
-		if (!over || active.id === over.id) {
+		if (!over) {
 			return;
 		}
 
@@ -213,11 +242,17 @@ export default function BentoGrid() {
 			if (group.shortcuts.some((item) => item.id === active.id)) {
 				sourceId = group.id;
 			}
-
-			if (group.shortcuts.some((item) => item.id === over.id)) {
-				targetId = group.id;
-			}
 		});
+
+		if (typeof over.id === "string" && over.id.startsWith("group-")) {
+			targetId = over.id.replace("group-", "");
+		} else {
+			groups.forEach((group) => {
+				if (group.shortcuts.some((item) => item.id === over.id)) {
+					targetId = group.id;
+				}
+			});
+		}
 
 		if (!sourceId || !targetId) {
 			return;
@@ -253,6 +288,10 @@ export default function BentoGrid() {
 					return prev;
 				}
 
+				if (oldIndex === newIndex) {
+					return prev;
+				}
+
 				source.shortcuts = arrayMove(source.shortcuts, oldIndex, newIndex);
 
 				return copy;
@@ -278,13 +317,68 @@ export default function BentoGrid() {
 		});
 	}
 
+	useEffect(() => {
+		let unlisten: undefined | (() => void);
+
+		async function init() {
+			const webview = getCurrentWebview();
+
+			unlisten = await webview.onDragDropEvent(async (event) => {
+				switch (event.payload.type) {
+					case "over":
+						break;
+
+					case "leave":
+						setDropTargetGroup(null);
+						break;
+
+					case "drop": {
+						const target = dropTargetGroupRef.current;
+
+						console.log("DROP TARGET:", target);
+						console.log("PATH:", event.payload.paths);
+
+						if (!target) {
+							console.log("NO TARGET GROUP");
+							return;
+						}
+
+						const path = event.payload.paths[0];
+
+						const shortcut = await invoke<Shortcut>("parse_shortcut", {
+							path,
+						});
+
+						addShortcutToGroup(target, {
+							...shortcut,
+							id: crypto.randomUUID(),
+						});
+
+						break;
+					}
+				}
+			});
+		}
+
+		init();
+
+		return () => {
+			unlisten?.();
+		};
+	}, []);
+
 	return (
 		<section ref={containerRef} className={styles.wrapper}>
 			{mounted && (
 				<DndContext
 					sensors={sensors}
 					collisionDetection={closestCenter}
-					onDragEnd={handleShortcutDragEnd}
+					onDragStart={() => setIsDraggingShortcut(true)}
+					onDragEnd={(e) => {
+						setIsDraggingShortcut(false);
+						handleShortcutDragEnd(e);
+					}}
+					onDragCancel={() => setIsDraggingShortcut(false)}
 				>
 					<ReactGridLayout
 						width={width}
@@ -296,8 +390,8 @@ export default function BentoGrid() {
 							containerPadding: [0, 0],
 						}}
 						dragConfig={{
-							enabled: true,
-							cancel: "button",
+							enabled: !isDraggingShortcut,
+							cancel: ".shortcut-drag",
 						}}
 						resizeConfig={{
 							enabled: false,
@@ -311,6 +405,15 @@ export default function BentoGrid() {
 									onTitleChange={handleGroupTitleChange}
 									onFinishEditing={handleFinishEditing}
 									onFocus={() => setFocusedGroupId(group.id)}
+									onDragOver={(id) => {
+										dropTargetGroupRef.current = id;
+										setDropTargetGroup(id);
+									}}
+									onDragLeave={() => {
+										dropTargetGroupRef.current = null;
+										setDropTargetGroup(null);
+									}}
+									dropTargetGroup={dropTargetGroup}
 								/>
 							</div>
 						))}

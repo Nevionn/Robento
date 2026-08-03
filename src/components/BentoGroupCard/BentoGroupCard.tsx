@@ -1,3 +1,4 @@
+import { useDroppable } from "@dnd-kit/core";
 import type { BentoGroup } from "../BentoGrid/BentoGrid";
 import styles from "../BentoGrid/BentoGrid.module.css";
 import ShortcutGrid from "../ShortcutGrid/ShortcutGrid";
@@ -7,6 +8,9 @@ interface Props {
 	onTitleChange(id: string, title: string): void;
 	onFinishEditing(id: string): void;
 	onFocus(): void;
+	onDragOver(id: string): void;
+	onDragLeave(): void;
+	dropTargetGroup: string | null;
 }
 
 /**
@@ -23,9 +27,30 @@ export default function BentoGroupCard({
 	onTitleChange,
 	onFinishEditing,
 	onFocus,
+	onDragOver,
+	onDragLeave,
 }: Props) {
+	const { setNodeRef, isOver } = useDroppable({
+		id: `group-${group.id}`,
+	});
 	return (
-		<div className={styles.card} tabIndex={0} onFocus={onFocus}>
+		<div
+			ref={setNodeRef}
+			tabIndex={0}
+			className={styles.card}
+			style={{
+				background: isOver ? "#4a4c7d" : undefined,
+			}}
+			onFocus={onFocus}
+			onMouseEnter={() => {
+				onFocus();
+				onDragOver(group.id);
+			}}
+			onDragEnter={() => {
+				onDragOver(group.id);
+			}}
+			onDragLeave={onDragLeave}
+		>
 			<header className={styles.header}>
 				{group.isEditing ? (
 					<input
