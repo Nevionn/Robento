@@ -15,9 +15,9 @@ import { useEffect, useRef, useState } from "react";
 
 import type { Layout } from "react-grid-layout";
 import ReactGridLayout, { useContainerWidth } from "react-grid-layout";
+import { generateLayout, updateLayoutHeight } from "./layout";
 
 import "react-grid-layout/css/styles.css";
-
 import BentoGroupCard from "../BentoGroupCard/BentoGroupCard";
 import styles from "./BentoGrid.module.css";
 
@@ -37,66 +37,6 @@ export interface BentoGroup {
 }
 
 const initialGroups: BentoGroup[] = [];
-
-/**
- * Вычисляет необходимую высоту карточки в grid-ячейках.
- *
- * Расчёт основан на двухколоночном расположении ярлыков:
- * каждые два элемента занимают один ряд.
- */
-
-function calcH(count: number) {
-	return Math.max(1, Math.ceil(count / 2));
-}
-
-/**
- * Генерирует начальную раскладку карточек Bento-сетки.
- *
- * Распределяет группы между двумя колонками,
- * стараясь сохранять одинаковую высоту колонок.
- *
- * Возвращает layout, совместимый с react-grid-layout.
- */
-
-function generateLayout(groups: BentoGroup[]): Layout {
-	const colY = [0, 0];
-
-	return groups.map((group) => {
-		const h = calcH(group.shortcuts.length);
-
-		const col = colY[0] <= colY[1] ? 0 : 1;
-		const y = colY[col];
-
-		colY[col] += h;
-
-		return {
-			i: group.id,
-			x: col,
-			y,
-			w: 1,
-			h,
-		};
-	});
-}
-
-/**
- * Перерасчет высоты после добавления нового ярлыка в группу.
- */
-
-function updateLayoutHeight(groups: BentoGroup[], layout: Layout): Layout {
-	return layout.map((item) => {
-		const group = groups.find((group) => group.id === item.i);
-
-		if (!group) {
-			return item;
-		}
-
-		return {
-			...item,
-			h: calcH(group.shortcuts.length),
-		};
-	});
-}
 
 /**
  * Главный контейнер Bento-сетки.
@@ -335,11 +275,7 @@ export default function BentoGrid() {
 					case "drop": {
 						const target = dropTargetGroupRef.current;
 
-						console.log("DROP TARGET:", target);
-						console.log("PATH:", event.payload.paths);
-
 						if (!target) {
-							console.log("NO TARGET GROUP");
 							return;
 						}
 
