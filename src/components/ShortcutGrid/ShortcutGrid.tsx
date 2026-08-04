@@ -31,6 +31,7 @@ export default function ShortcutGrid({ shortcuts }: Props) {
 					id={shortcut.id}
 					name={shortcut.name}
 					icon={shortcut.icon}
+					target={shortcut.target}
 				/>
 			))}
 		</SortableContext>

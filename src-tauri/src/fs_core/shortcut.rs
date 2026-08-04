@@ -1,5 +1,6 @@
 use serde::Serialize;
 use std::path::Path;
+use std::process::Command;
 
 use lnk::{
     encoding::WINDOWS_1252,
@@ -74,4 +75,14 @@ pub fn parse_shortcut(path: String) -> Result<Shortcut, String> {
         source: path,
         icon,
     })
+}
+
+
+#[tauri::command]
+pub fn launch_shortcut(target: String) -> Result<(), String> {
+    Command::new(&target)
+        .spawn()
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
 }

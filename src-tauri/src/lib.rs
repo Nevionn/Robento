@@ -1,6 +1,6 @@
 mod fs_core;
 
-use fs_core::shortcut::parse_shortcut;
+use fs_core::shortcut::{parse_shortcut, launch_shortcut};
 
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -12,7 +12,8 @@ pub fn run() {
         )
         .invoke_handler(
             tauri::generate_handler![
-                parse_shortcut
+                parse_shortcut,
+                launch_shortcut
             ]
         )
         .run(
