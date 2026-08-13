@@ -7,6 +7,7 @@ interface Props {
 	group: BentoGroup;
 	onTitleChange(id: string, title: string): void;
 	onFinishEditing(id: string): void;
+	onPersistGroup(id: string, title: string): void;
 	onFocus(): void;
 	onDragOver(id: string): void;
 	onDragLeave(): void;
@@ -25,6 +26,7 @@ interface Props {
 export default function BentoGroupCard({
 	group,
 	onTitleChange,
+	onPersistGroup,
 	onFinishEditing,
 	onFocus,
 	onDragOver,
@@ -57,9 +59,13 @@ export default function BentoGroupCard({
 						autoFocus
 						value={group.title}
 						onChange={(event) => onTitleChange(group.id, event.target.value)}
-						onBlur={() => onFinishEditing(group.id)}
+						onBlur={() => {
+							onPersistGroup(group.id, group.title);
+							onFinishEditing(group.id);
+						}}
 						onKeyDown={(event) => {
 							if (event.key === "Enter") {
+								onPersistGroup(group.id, group.title);
 								onFinishEditing(group.id);
 							}
 						}}

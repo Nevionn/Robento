@@ -62,7 +62,7 @@ export default function BentoGrid() {
 
 	const [layout, setLayout] = useState<Layout>(generateLayout(initialGroups));
 
-	function createGroup() {
+	function addGroupDraft() {
 		const group: BentoGroup = {
 			id: crypto.randomUUID(),
 			title: "",
@@ -77,6 +77,39 @@ export default function BentoGrid() {
 
 			return next;
 		});
+	}
+
+	async function persistGroup(id: string, title: string) {
+		try {
+			const group = await invoke<{
+				id: string;
+				title: string;
+				sort_order: number;
+				created_at: string;
+			}>("create_group", {
+				title,
+				sortOrder: groups.length,
+			});
+
+			setGroups((prev) => {
+				const next = prev.map((item) =>
+					item.id === id
+						? {
+								...item,
+								id: group.id,
+								title: group.title,
+								isEditing: false,
+							}
+						: item,
+				);
+
+				setLayout(generateLayout(next));
+
+				return next;
+			});
+		} catch (error) {
+			console.error("Не удалось сохранить группу:", error);
+		}
 	}
 
 	function handleGroupTitleChange(id: string, title: string) {
@@ -152,7 +185,8 @@ export default function BentoGrid() {
 
 			if (event.shiftKey && event.key.toLowerCase() === "g") {
 				event.preventDefault();
-				createGroup();
+				addGroupDraft();
+				return;
 			}
 
 			if (event.key === "r" && focusedGroupId) {
@@ -340,6 +374,7 @@ export default function BentoGrid() {
 									group={group}
 									onTitleChange={handleGroupTitleChange}
 									onFinishEditing={handleFinishEditing}
+									onPersistGroup={persistGroup}
 									onFocus={() => setFocusedGroupId(group.id)}
 									onDragOver={(id) => {
 										dropTargetGroupRef.current = id;
