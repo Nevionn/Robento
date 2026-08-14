@@ -6,8 +6,7 @@ import ShortcutGrid from "../ShortcutGrid/ShortcutGrid";
 interface Props {
 	group: BentoGroup;
 	onTitleChange(id: string, title: string): void;
-	onFinishEditing(id: string): void;
-	onPersistGroup(id: string, title: string): void;
+	onSubmitGroup(id: string, title: string): void;
 	onFocus(): void;
 	onDragOver(id: string): void;
 	onDragLeave(): void;
@@ -26,8 +25,7 @@ interface Props {
 export default function BentoGroupCard({
 	group,
 	onTitleChange,
-	onPersistGroup,
-	onFinishEditing,
+	onSubmitGroup,
 	onFocus,
 	onDragOver,
 	onDragLeave,
@@ -35,6 +33,11 @@ export default function BentoGroupCard({
 	const { setNodeRef, isOver } = useDroppable({
 		id: `group-${group.id}`,
 	});
+
+	function handleSubmit() {
+		onSubmitGroup(group.id, group.title);
+	}
+
 	return (
 		<div
 			ref={setNodeRef}
@@ -59,15 +62,14 @@ export default function BentoGroupCard({
 						autoFocus
 						value={group.title}
 						onChange={(event) => onTitleChange(group.id, event.target.value)}
-						onBlur={() => {
-							onPersistGroup(group.id, group.title);
-							onFinishEditing(group.id);
-						}}
+						onBlur={handleSubmit}
 						onKeyDown={(event) => {
-							if (event.key === "Enter") {
-								onPersistGroup(group.id, group.title);
-								onFinishEditing(group.id);
+							if (event.key !== "Enter") {
+								return;
 							}
+
+							event.preventDefault();
+							handleSubmit();
 						}}
 					/>
 				) : (

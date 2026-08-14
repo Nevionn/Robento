@@ -64,7 +64,7 @@ export default function BentoGrid() {
 
 	function addGroupDraft() {
 		const group: BentoGroup = {
-			id: crypto.randomUUID(),
+			id: `draft-${crypto.randomUUID()}`,
 			title: "",
 			shortcuts: [],
 			isEditing: true,
@@ -72,9 +72,7 @@ export default function BentoGrid() {
 
 		setGroups((prev) => {
 			const next = [...prev, group];
-
 			setLayout(generateLayout(next));
-
 			return next;
 		});
 	}
@@ -103,11 +101,10 @@ export default function BentoGrid() {
 				);
 
 				setLayout(generateLayout(next));
-
 				return next;
 			});
 		} catch (error) {
-			console.error("Не удалось сохранить группу:", error);
+			console.error("Не удалось создать группу:", error);
 		}
 	}
 
@@ -141,6 +138,43 @@ export default function BentoGrid() {
 		loadGroups();
 	}, []);
 
+	async function updateGroupTitle(id: string, title: string) {
+		try {
+			const group = await invoke<{
+				id: string;
+				title: string;
+				sort_order: number;
+				created_at: string;
+			}>("update_group_title", {
+				id,
+				title,
+			});
+
+			setGroups((prev) =>
+				prev.map((item) =>
+					item.id === id
+						? {
+								...item,
+								title: group.title,
+								isEditing: false,
+							}
+						: item,
+				),
+			);
+		} catch (error) {
+			console.error("Не удалось изменить название группы:", error);
+		}
+	}
+
+	async function submitGroupTitle(id: string, title: string) {
+		if (id.startsWith("draft-")) {
+			await persistGroup(id, title);
+			return;
+		}
+
+		await updateGroupTitle(id, title);
+	}
+
 	function handleGroupTitleChange(id: string, title: string) {
 		setGroups((prev) =>
 			prev.map((group) =>
@@ -148,19 +182,6 @@ export default function BentoGrid() {
 					? {
 							...group,
 							title,
-						}
-					: group,
-			),
-		);
-	}
-
-	function handleFinishEditing(id: string) {
-		setGroups((prev) =>
-			prev.map((group) =>
-				group.id === id
-					? {
-							...group,
-							isEditing: false,
 						}
 					: group,
 			),
@@ -402,8 +423,7 @@ export default function BentoGrid() {
 								<BentoGroupCard
 									group={group}
 									onTitleChange={handleGroupTitleChange}
-									onFinishEditing={handleFinishEditing}
-									onPersistGroup={persistGroup}
+									onSubmitGroup={submitGroupTitle}
 									onFocus={() => setFocusedGroupId(group.id)}
 									onDragOver={(id) => {
 										dropTargetGroupRef.current = id;

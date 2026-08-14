@@ -135,3 +135,42 @@ pub async fn get_groups(
         })
         .collect())
 }
+
+#[tauri::command]
+pub async fn update_group_title(
+    pool: State<'_, SqlitePool>,
+    id: String,
+    title: String,
+) -> Result<GroupDto, String> {
+    sqlx::query(
+        r#"
+        UPDATE Groups
+        SET title = ?
+        WHERE id = ?
+        "#,
+    )
+    .bind(&title)
+    .bind(&id)
+    .execute(pool.inner())
+    .await
+    .map_err(|e| e.to_string())?;
+
+    let row = sqlx::query(
+        r#"
+        SELECT id, title, sort_order, created_at
+        FROM Groups
+        WHERE id = ?
+        "#,
+    )
+    .bind(&id)
+    .fetch_one(pool.inner())
+    .await
+    .map_err(|e| e.to_string())?;
+
+    Ok(GroupDto {
+        id: row.get("id"),
+        title: row.get("title"),
+        sort_order: row.get("sort_order"),
+        created_at: row.get("created_at"),
+    })
+}
