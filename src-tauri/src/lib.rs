@@ -2,7 +2,7 @@ mod fs_core;
 mod db_core;
 
 use db_core::db::init_db;
-use db_core::groups::{init_groups_table, create_group};
+use db_core::groups::{init_groups_table, create_group, get_groups};
 use db_core::shortcuts::init_shortcuts_table;
 use fs_core::shortcut::{launch_shortcut, parse_shortcut};
 
@@ -28,7 +28,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             parse_shortcut,
             launch_shortcut,
-            create_group
+            create_group,
+            get_groups
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

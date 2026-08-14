@@ -88,7 +88,6 @@ export default function BentoGrid() {
 				created_at: string;
 			}>("create_group", {
 				title,
-				sortOrder: groups.length,
 			});
 
 			setGroups((prev) => {
@@ -111,6 +110,36 @@ export default function BentoGrid() {
 			console.error("Не удалось сохранить группу:", error);
 		}
 	}
+
+	async function loadGroups() {
+		try {
+			const savedGroups =
+				await invoke<
+					{
+						id: string;
+						title: string;
+						sort_order: number;
+						created_at: string;
+					}[]
+				>("get_groups");
+
+			const loadedGroups: BentoGroup[] = savedGroups.map((group) => ({
+				id: group.id,
+				title: group.title,
+				shortcuts: [],
+				isEditing: false,
+			}));
+
+			setGroups(loadedGroups);
+			setLayout(generateLayout(loadedGroups));
+		} catch (error) {
+			console.error("Не удалось загрузить группы:", error);
+		}
+	}
+
+	useEffect(() => {
+		loadGroups();
+	}, []);
 
 	function handleGroupTitleChange(id: string, title: string) {
 		setGroups((prev) =>

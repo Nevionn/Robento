@@ -60,7 +60,6 @@ pub struct GroupDto {
 pub async fn create_group(
     pool: State<'_, SqlitePool>,
     title: String,
-    sort_order: i64,
 ) -> Result<GroupDto, String> {
     let timestamp = Timestamp::now(uuid::NoContext);
 
@@ -72,6 +71,13 @@ pub async fn create_group(
 
     let created_at: String = sqlx::query_scalar(
         "SELECT datetime('now')"
+    )
+    .fetch_one(pool.inner())
+    .await
+    .map_err(|e| e.to_string())?;
+
+    let sort_order: i64 = sqlx::query_scalar(
+        "SELECT COALESCE(MAX(sort_order), -1) + 1 FROM Groups"
     )
     .fetch_one(pool.inner())
     .await
@@ -102,4 +108,30 @@ pub async fn create_group(
         sort_order,
         created_at,
     })
+}
+
+#[tauri::command]
+pub async fn get_groups(
+    pool: State<'_, SqlitePool>,
+) -> Result<Vec<GroupDto>, String> {
+    let rows = sqlx::query(
+        r#"
+        SELECT id, title, sort_order, created_at
+        FROM Groups
+        ORDER BY sort_order ASC
+        "#,
+    )
+    .fetch_all(pool.inner())
+    .await
+    .map_err(|e| e.to_string())?;
+
+    Ok(rows
+        .into_iter()
+        .map(|row| GroupDto {
+            id: row.get("id"),
+            title: row.get("title"),
+            sort_order: row.get("sort_order"),
+            created_at: row.get("created_at"),
+        })
+        .collect())
 }
