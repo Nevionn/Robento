@@ -10,16 +10,17 @@ import {
 import { arrayMove } from "@dnd-kit/sortable";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWebview } from "@tauri-apps/api/webview";
-
 import { useEffect, useRef, useState } from "react";
-
 import type { Layout } from "react-grid-layout";
-import ReactGridLayout, { useContainerWidth } from "react-grid-layout";
-import { generateLayout, updateLayoutHeight } from "./layout";
 
+import ReactGridLayout, { useContainerWidth } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
+
+import { useBentoGroups } from "../../hooks/useBentoGroups";
 import BentoGroupCard from "../BentoGroupCard/BentoGroupCard";
+
 import styles from "./BentoGrid.module.css";
+import { generateLayout, updateLayoutHeight } from "./layout";
 
 export interface Shortcut {
 	id: string;
@@ -62,118 +63,10 @@ export default function BentoGrid() {
 
 	const [layout, setLayout] = useState<Layout>(generateLayout(initialGroups));
 
-	function addGroupDraft() {
-		const group: BentoGroup = {
-			id: `draft-${crypto.randomUUID()}`,
-			title: "",
-			shortcuts: [],
-			isEditing: true,
-		};
-
-		setGroups((prev) => {
-			const next = [...prev, group];
-			setLayout(generateLayout(next));
-			return next;
-		});
-	}
-
-	async function persistGroup(id: string, title: string) {
-		try {
-			const group = await invoke<{
-				id: string;
-				title: string;
-				sort_order: number;
-				created_at: string;
-			}>("create_group", {
-				title,
-			});
-
-			setGroups((prev) => {
-				const next = prev.map((item) =>
-					item.id === id
-						? {
-								...item,
-								id: group.id,
-								title: group.title,
-								isEditing: false,
-							}
-						: item,
-				);
-
-				setLayout(generateLayout(next));
-				return next;
-			});
-		} catch (error) {
-			console.error("Не удалось создать группу:", error);
-		}
-	}
-
-	async function loadGroups() {
-		try {
-			const savedGroups =
-				await invoke<
-					{
-						id: string;
-						title: string;
-						sort_order: number;
-						created_at: string;
-					}[]
-				>("get_groups");
-
-			const loadedGroups: BentoGroup[] = savedGroups.map((group) => ({
-				id: group.id,
-				title: group.title,
-				shortcuts: [],
-				isEditing: false,
-			}));
-
-			setGroups(loadedGroups);
-			setLayout(generateLayout(loadedGroups));
-		} catch (error) {
-			console.error("Не удалось загрузить группы:", error);
-		}
-	}
-
-	useEffect(() => {
-		loadGroups();
-	}, []);
-
-	async function updateGroupTitle(id: string, title: string) {
-		try {
-			const group = await invoke<{
-				id: string;
-				title: string;
-				sort_order: number;
-				created_at: string;
-			}>("update_group_title", {
-				id,
-				title,
-			});
-
-			setGroups((prev) =>
-				prev.map((item) =>
-					item.id === id
-						? {
-								...item,
-								title: group.title,
-								isEditing: false,
-							}
-						: item,
-				),
-			);
-		} catch (error) {
-			console.error("Не удалось изменить название группы:", error);
-		}
-	}
-
-	async function submitGroupTitle(id: string, title: string) {
-		if (id.startsWith("draft-")) {
-			await persistGroup(id, title);
-			return;
-		}
-
-		await updateGroupTitle(id, title);
-	}
+	const { addGroupDraft, submitGroupTitle } = useBentoGroups({
+		setGroups,
+		setLayout,
+	});
 
 	function handleGroupTitleChange(id: string, title: string) {
 		setGroups((prev) =>
@@ -226,7 +119,6 @@ export default function BentoGrid() {
 		}),
 	);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		function handleKeyDown(event: KeyboardEvent) {
 			if (event.repeat) {
