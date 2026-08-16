@@ -17,6 +17,7 @@ import ReactGridLayout, { useContainerWidth } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 
 import { useBentoGroups } from "../../hooks/useBentoGroups";
+import { useBentoKeyboardShortcuts } from "../../hooks/useBentoKeyboardShortcuts";
 import BentoGroupCard from "../BentoGroupCard/BentoGroupCard";
 
 import styles from "./BentoGrid.module.css";
@@ -63,9 +64,16 @@ export default function BentoGrid() {
 
 	const [layout, setLayout] = useState<Layout>(generateLayout(initialGroups));
 
-	const { addGroupDraft, submitGroupTitle } = useBentoGroups({
+	const { addGroupDraft, submitGroupTitle, deleteGroup } = useBentoGroups({
 		setGroups,
 		setLayout,
+	});
+
+	useBentoKeyboardShortcuts({
+		focusedGroupId,
+		onCreateGroup: addGroupDraft,
+		onEditGroup: startEditingGroup,
+		onDeleteGroup: deleteGroup,
 	});
 
 	function handleGroupTitleChange(id: string, title: string) {
@@ -118,31 +126,6 @@ export default function BentoGrid() {
 			},
 		}),
 	);
-
-	useEffect(() => {
-		function handleKeyDown(event: KeyboardEvent) {
-			if (event.repeat) {
-				return;
-			}
-
-			if (event.shiftKey && event.key.toLowerCase() === "g") {
-				event.preventDefault();
-				addGroupDraft();
-				return;
-			}
-
-			if (event.key === "r" && focusedGroupId) {
-				event.preventDefault();
-				startEditingGroup(focusedGroupId);
-			}
-		}
-
-		window.addEventListener("keydown", handleKeyDown);
-
-		return () => {
-			window.removeEventListener("keydown", handleKeyDown);
-		};
-	}, [focusedGroupId]);
 
 	function handleShortcutDragEnd(event: DragEndEvent) {
 		const { active, over } = event;

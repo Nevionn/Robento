@@ -179,6 +179,36 @@ export function useBentoGroups({ setGroups, setLayout }: UseBentoGroupsParams) {
 		[persistGroup, updateGroupTitle],
 	);
 
+	/**
+	 * Удаляет существующую группу из БД.
+	 *
+	 * Draft-группы в БД не существуют, поэтому для них
+	 * достаточно удалить локальную группу без backend-вызова.
+	 *
+	 * После удаления пересчитывается layout.
+	 */
+
+	const deleteGroup = useCallback(
+		async (id: string) => {
+			try {
+				if (!id.startsWith("draft-")) {
+					await invoke("delete_group", { id });
+				}
+
+				setGroups((prev) => {
+					const next = prev.filter((group) => group.id !== id);
+
+					setLayout(generateLayout(next));
+
+					return next;
+				});
+			} catch (error) {
+				console.error("Не удалось удалить группу:", error);
+			}
+		},
+		[setGroups, setLayout],
+	);
+
 	useEffect(() => {
 		void loadGroups();
 	}, [loadGroups]);
@@ -189,5 +219,6 @@ export function useBentoGroups({ setGroups, setLayout }: UseBentoGroupsParams) {
 		loadGroups,
 		updateGroupTitle,
 		submitGroupTitle,
+		deleteGroup,
 	};
 }

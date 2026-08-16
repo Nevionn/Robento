@@ -174,3 +174,22 @@ pub async fn update_group_title(
         created_at: row.get("created_at"),
     })
 }
+
+#[tauri::command]
+pub async fn delete_group(
+    pool: State<'_, SqlitePool>,
+    id: String,
+) -> Result<(), String> {
+    sqlx::query(
+        r#"
+        DELETE FROM Groups
+        WHERE id = ?
+        "#,
+    )
+    .bind(&id)
+    .execute(pool.inner())
+    .await
+    .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
