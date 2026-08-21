@@ -12,13 +12,15 @@ interface UseBentoGroupsParams {
 }
 
 /**
- * CRUD-операции групп.
+ * Операции с группами.
  *
  * Отвечает только за:
  * - создание draft-группы;
  * - сохранение новой группы в БД;
  * - загрузку групп из БД;
  * - изменение названия существующей группы;
+ * - сохранение порядка групп в БД;
+ * - удаление группы;
  * - маршрутизацию submit между create и update.
  *
  * Локальное редактирование title и управление isEditing
@@ -161,6 +163,26 @@ export function useBentoGroups({ setGroups, setLayout }: UseBentoGroupsParams) {
 	);
 
 	/**
+	 * Сохраняет текущий порядок групп в БД (reDnd).
+	 *
+	 * Получает массив id групп в порядке их расположения
+	 * на сетке и передаёт его backend для обновления sort_order.
+	 *
+	 * Порядок массива соответствует порядку групп:
+	 * индекс группы в массиве используется как её новая позиция.
+	 */
+
+	const updateGroupsOrder = useCallback(async (groupIds: string[]) => {
+		try {
+			await invoke("update_groups_order", {
+				groupIds,
+			});
+		} catch (error) {
+			console.error("Не удалось сохранить порядок групп:", error);
+		}
+	}, []);
+
+	/**
 	 * Единая точка сохранения заголовка.
 	 *
 	 * Draft -> create_group
@@ -219,6 +241,7 @@ export function useBentoGroups({ setGroups, setLayout }: UseBentoGroupsParams) {
 		loadGroups,
 		updateGroupTitle,
 		submitGroupTitle,
+		updateGroupsOrder,
 		deleteGroup,
 	};
 }

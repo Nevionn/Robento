@@ -2,7 +2,7 @@ mod fs_core;
 mod db_core;
 
 use db_core::db::init_db;
-use db_core::groups::{init_groups_table, create_group, get_groups, update_group_title, delete_group};
+use db_core::groups::{init_groups_table, create_group, get_groups, update_group_title, update_groups_order, delete_group};
 use db_core::shortcuts::init_shortcuts_table;
 use fs_core::shortcut::{launch_shortcut, parse_shortcut};
 
@@ -31,6 +31,7 @@ pub fn run() {
             create_group,
             get_groups,
             update_group_title,
+            update_groups_order,
             delete_group
         ])
         .run(tauri::generate_context!())

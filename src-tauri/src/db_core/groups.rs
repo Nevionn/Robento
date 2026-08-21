@@ -176,6 +176,39 @@ pub async fn update_group_title(
 }
 
 #[tauri::command]
+pub async fn update_groups_order(
+    pool: State<'_, SqlitePool>,
+    group_ids: Vec<String>,
+) -> Result<(), String> {
+    let mut tx = pool
+        .inner()
+        .begin()
+        .await
+        .map_err(|e| e.to_string())?;
+
+    for (sort_order, id) in group_ids.iter().enumerate() {
+        sqlx::query(
+            r#"
+            UPDATE Groups
+            SET sort_order = ?
+            WHERE id = ?
+            "#,
+        )
+        .bind(sort_order as i64)
+        .bind(id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| e.to_string())?;
+    }
+
+    tx.commit()
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+#[tauri::command]
 pub async fn delete_group(
     pool: State<'_, SqlitePool>,
     id: String,

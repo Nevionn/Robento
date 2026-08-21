@@ -64,10 +64,11 @@ export default function BentoGrid() {
 
 	const [layout, setLayout] = useState<Layout>(generateLayout(initialGroups));
 
-	const { addGroupDraft, submitGroupTitle, deleteGroup } = useBentoGroups({
-		setGroups,
-		setLayout,
-	});
+	const { addGroupDraft, submitGroupTitle, deleteGroup, updateGroupsOrder } =
+		useBentoGroups({
+			setGroups,
+			setLayout,
+		});
 
 	useBentoKeyboardShortcuts({
 		focusedGroupId,
@@ -291,7 +292,21 @@ export default function BentoGrid() {
 						resizeConfig={{
 							enabled: false,
 						}}
-						onLayoutChange={(next) => setLayout([...next])}
+						onLayoutChange={(next) => {
+							setLayout([...next]);
+
+							const orderedGroupIds = [...next]
+								.sort((currentGroup, nextGroup) => {
+									if (currentGroup.y !== nextGroup.y) {
+										return currentGroup.y - nextGroup.y;
+									}
+
+									return currentGroup.x - nextGroup.x;
+								})
+								.map((groupLayout) => groupLayout.i);
+
+							void updateGroupsOrder(orderedGroupIds);
+						}}
 					>
 						{groups.map((group) => (
 							<div key={group.id}>
