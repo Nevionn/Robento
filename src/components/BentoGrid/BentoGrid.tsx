@@ -11,15 +11,16 @@ import { arrayMove } from "@dnd-kit/sortable";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWebview } from "@tauri-apps/api/webview";
 import { useEffect, useRef, useState } from "react";
-import type { Layout } from "react-grid-layout";
 
+import type { Layout } from "react-grid-layout";
 import ReactGridLayout, { useContainerWidth } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 
 import { useBentoGroups } from "../../hooks/useBentoGroups";
 import { useBentoKeyboardShortcuts } from "../../hooks/useBentoKeyboardShortcuts";
-import BentoGroupCard from "../BentoGroupCard/BentoGroupCard";
+import { useBentoShortcuts } from "../../hooks/useBentoShortcuts";
 
+import BentoGroupCard from "../BentoGroupCard/BentoGroupCard";
 import styles from "./BentoGrid.module.css";
 import { generateLayout, updateLayoutHeight } from "./layout";
 
@@ -44,31 +45,105 @@ const initialGroups: BentoGroup[] = [];
  * Главный контейнер Bento-сетки.
  *
  * Отвечает за:
- * - хранение групп;
+ * - хранение групп в локальном state;
+ * - первичную загрузку групп и ярлыков;
  * - отображение Bento-карточек;
  * - перемещение ярлыков;
  * - перенос ярлыков между группами;
  * - сортировку ярлыков внутри группы;
- * - перерасчёт высоты групп после изменения содержимого.
+ * - локальное редактирование названия группы;
+ * - перерасчёт высоты групп после изменения содержимого;
+ * - обработку DnD файлов из ОС.
+ *
+ * CRUD-операции групп и ярлыков выполняются соответствующими хуками:
+ * - useBentoGroups — группы;
+ * - useBentoShortcuts — ярлыки.
  */
 
 export default function BentoGrid() {
 	const { width, containerRef, mounted } = useContainerWidth();
-
-	const [groups, setGroups] = useState(initialGroups);
+	const [groups, setGroups] = useState<BentoGroup[]>(initialGroups);
 	const [focusedGroupId, setFocusedGroupId] = useState<string | null>(null);
 	const [dropTargetGroup, setDropTargetGroup] = useState<string | null>(null);
 	const [isDraggingShortcut, setIsDraggingShortcut] = useState(false);
+	const [isInitialLoading, setIsInitialLoading] = useState(true);
 
 	const dropTargetGroupRef = useRef<string | null>(null);
-
 	const [layout, setLayout] = useState<Layout>(generateLayout(initialGroups));
 
-	const { addGroupDraft, submitGroupTitle, deleteGroup, updateGroupsOrder } =
-		useBentoGroups({
+	const {
+		addGroupDraft,
+		submitGroupTitle,
+		deleteGroup,
+		updateGroupsOrder,
+		loadGroups,
+	} = useBentoGroups({
+		setGroups,
+		setLayout,
+	});
+
+	const { createShortcut, loadShortcuts, applyLoadedShortcuts } =
+		useBentoShortcuts({
 			setGroups,
 			setLayout,
 		});
+
+	/**
+	 * Первичная загрузка.
+	 *
+	 * loadGroups() -> oadShortcuts() -> applyLoadedShortcuts(savedShortcuts)
+	 *
+	 * ReactGridLayout НЕ монтируется до тех пор,
+	 * пока ярлыки не загружены и groups не получили
+	 * актуальное содержимое.
+	 */
+
+	useEffect(() => {
+		let cancelled = false;
+
+		async function initialize() {
+			try {
+				await loadGroups();
+
+				if (cancelled) {
+					return;
+				}
+
+				const savedShortcuts = await loadShortcuts();
+
+				if (cancelled) {
+					return;
+				}
+
+				applyLoadedShortcuts(savedShortcuts);
+			} finally {
+				if (!cancelled) {
+					setIsInitialLoading(false);
+				}
+			}
+		}
+
+		void initialize();
+
+		return () => {
+			cancelled = true;
+		};
+	}, [loadGroups, loadShortcuts, applyLoadedShortcuts]);
+
+	/**
+	 * После первичной загрузки groups уже содержит ярлыки.
+	 *
+	 * Здесь строим layout только один раз из актуального
+	 * состояния.
+	 */
+
+	useEffect(() => {
+		if (isInitialLoading) {
+			return;
+		}
+
+		setLayout((current) => updateLayoutHeight(groups, current));
+	}, [isInitialLoading]);
 
 	useBentoKeyboardShortcuts({
 		focusedGroupId,
@@ -101,23 +176,6 @@ export default function BentoGrid() {
 					: group,
 			),
 		);
-	}
-
-	function addShortcutToGroup(groupId: string, shortcut: Shortcut) {
-		setGroups((prev) => {
-			const next = prev.map((group) =>
-				group.id === groupId
-					? {
-							...group,
-							shortcuts: [...group.shortcuts, shortcut],
-						}
-					: group,
-			);
-
-			setLayout((current) => updateLayoutHeight(next, current));
-
-			return next;
-		});
 	}
 
 	const sensors = useSensors(
@@ -160,9 +218,7 @@ export default function BentoGrid() {
 
 		setGroups((prev) => {
 			const copy = structuredClone(prev);
-
 			const source = copy.find((group) => group.id === sourceId);
-
 			const target = copy.find((group) => group.id === targetId);
 
 			if (!source || !target) {
@@ -177,8 +233,7 @@ export default function BentoGrid() {
 				return prev;
 			}
 
-			// сортировка внутри группы
-
+			// Сортировка внутри группы.
 			if (sourceId === targetId) {
 				const newIndex = source.shortcuts.findIndex(
 					(item) => item.id === over.id,
@@ -197,8 +252,7 @@ export default function BentoGrid() {
 				return copy;
 			}
 
-			// перенос между группами
-
+			// Перенос между группами.
 			const [item] = source.shortcuts.splice(oldIndex, 1);
 
 			const targetIndex = target.shortcuts.findIndex(
@@ -233,9 +287,9 @@ export default function BentoGrid() {
 						break;
 
 					case "drop": {
-						const target = dropTargetGroupRef.current;
+						const targetGroupId = dropTargetGroupRef.current;
 
-						if (!target) {
+						if (!targetGroupId) {
 							return;
 						}
 
@@ -245,18 +299,14 @@ export default function BentoGrid() {
 							path,
 						});
 
-						addShortcutToGroup(target, {
-							...shortcut,
-							id: crypto.randomUUID(),
-						});
-
+						await createShortcut(targetGroupId, shortcut);
 						break;
 					}
 				}
 			});
 		}
 
-		init();
+		void init();
 
 		return () => {
 			unlisten?.();
@@ -265,14 +315,14 @@ export default function BentoGrid() {
 
 	return (
 		<section ref={containerRef} className={styles.wrapper}>
-			{mounted && (
+			{mounted && !isInitialLoading && (
 				<DndContext
 					sensors={sensors}
 					collisionDetection={closestCenter}
 					onDragStart={() => setIsDraggingShortcut(true)}
-					onDragEnd={(e) => {
+					onDragEnd={(event) => {
 						setIsDraggingShortcut(false);
-						handleShortcutDragEnd(e);
+						handleShortcutDragEnd(event);
 					}}
 					onDragCancel={() => setIsDraggingShortcut(false)}
 				>

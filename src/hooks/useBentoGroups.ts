@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 
 import type { Layout } from "react-grid-layout";
 import type { BentoGroup } from "../components/BentoGrid/BentoGrid";
@@ -230,10 +230,6 @@ export function useBentoGroups({ setGroups, setLayout }: UseBentoGroupsParams) {
 		},
 		[setGroups, setLayout],
 	);
-
-	useEffect(() => {
-		void loadGroups();
-	}, [loadGroups]);
 
 	return {
 		addGroupDraft,

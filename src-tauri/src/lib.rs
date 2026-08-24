@@ -3,7 +3,7 @@ mod db_core;
 
 use db_core::db::init_db;
 use db_core::groups::{init_groups_table, create_group, get_groups, update_group_title, update_groups_order, delete_group};
-use db_core::shortcuts::init_shortcuts_table;
+use db_core::shortcuts::{init_shortcuts_table, create_shortcut, get_shortcuts, update_shortcuts_order, delete_shortcut};
 use fs_core::shortcut::{launch_shortcut, parse_shortcut};
 
 use tauri::Manager;
@@ -28,6 +28,11 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             parse_shortcut,
             launch_shortcut,
+            create_shortcut,
+            get_shortcuts, 
+            update_shortcuts_order, 
+            delete_shortcut,
+
             create_group,
             get_groups,
             update_group_title,
