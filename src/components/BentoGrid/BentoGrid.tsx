@@ -82,11 +82,15 @@ export default function BentoGrid() {
 		setLayout,
 	});
 
-	const { createShortcut, loadShortcuts, applyLoadedShortcuts } =
-		useBentoShortcuts({
-			setGroups,
-			setLayout,
-		});
+	const {
+		createShortcut,
+		loadShortcuts,
+		applyLoadedShortcuts,
+		updateShortcutsOrder,
+	} = useBentoShortcuts({
+		setGroups,
+		setLayout,
+	});
 
 	/**
 	 * Первичная загрузка.
@@ -216,42 +220,35 @@ export default function BentoGrid() {
 			return;
 		}
 
-		setGroups((prev) => {
-			const copy = structuredClone(prev);
-			const source = copy.find((group) => group.id === sourceId);
-			const target = copy.find((group) => group.id === targetId);
+		const copy = structuredClone(groups);
 
-			if (!source || !target) {
-				return prev;
-			}
+		const source = copy.find((group) => group.id === sourceId);
+		const target = copy.find((group) => group.id === targetId);
 
-			const oldIndex = source.shortcuts.findIndex(
-				(item) => item.id === active.id,
+		if (!source || !target) {
+			return;
+		}
+
+		const oldIndex = source.shortcuts.findIndex(
+			(item) => item.id === active.id,
+		);
+
+		if (oldIndex === -1) {
+			return;
+		}
+
+		// Сортировка внутри группы.
+		if (sourceId === targetId) {
+			const newIndex = source.shortcuts.findIndex(
+				(item) => item.id === over.id,
 			);
 
-			if (oldIndex === -1) {
-				return prev;
+			if (newIndex === -1 || oldIndex === newIndex) {
+				return;
 			}
 
-			// Сортировка внутри группы.
-			if (sourceId === targetId) {
-				const newIndex = source.shortcuts.findIndex(
-					(item) => item.id === over.id,
-				);
-
-				if (newIndex === -1) {
-					return prev;
-				}
-
-				if (oldIndex === newIndex) {
-					return prev;
-				}
-
-				source.shortcuts = arrayMove(source.shortcuts, oldIndex, newIndex);
-
-				return copy;
-			}
-
+			source.shortcuts = arrayMove(source.shortcuts, oldIndex, newIndex);
+		} else {
 			// Перенос между группами.
 			const [item] = source.shortcuts.splice(oldIndex, 1);
 
@@ -264,11 +261,24 @@ export default function BentoGrid() {
 			} else {
 				target.shortcuts.splice(targetIndex, 0, item);
 			}
+		}
 
-			setLayout((current) => updateLayoutHeight(copy, current));
+		setGroups(copy);
+		setLayout((current) => updateLayoutHeight(copy, current));
 
-			return copy;
-		});
+		const shortcuts: {
+			id: string;
+			groupId: string;
+			sortOrder: number;
+		}[] = copy.flatMap((group: BentoGroup) =>
+			group.shortcuts.map((shortcut: Shortcut, index: number) => ({
+				id: shortcut.id,
+				groupId: group.id,
+				sortOrder: index,
+			})),
+		);
+
+		void updateShortcutsOrder(shortcuts);
 	}
 
 	useEffect(() => {
