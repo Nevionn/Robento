@@ -1,5 +1,6 @@
 mod fs_core;
 mod db_core;
+mod tray;
 
 use db_core::db::init_db;
 use db_core::groups::{init_groups_table, create_group, get_groups, update_group_title, update_groups_order, delete_group};
@@ -22,6 +23,8 @@ pub fn run() {
 
                 handle.manage(pool);
             });
+
+             tray::setup_tray(app)?;
 
             Ok(())
         })

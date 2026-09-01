@@ -95,7 +95,7 @@ export default function BentoGrid() {
 	/**
 	 * Первичная загрузка.
 	 *
-	 * loadGroups() -> oadShortcuts() -> applyLoadedShortcuts(savedShortcuts)
+	 * loadGroups() -> loadShortcuts() -> applyLoadedShortcuts(savedShortcuts)
 	 *
 	 * ReactGridLayout НЕ монтируется до тех пор,
 	 * пока ярлыки не загружены и groups не получили

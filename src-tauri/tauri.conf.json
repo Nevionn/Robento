@@ -14,9 +14,18 @@
 			{
 				"label": "main",
 				"title": "robento",
-				"width": 800,
-				"height": 600,
-				"dragDropEnabled": true
+				"width": 900,
+				"height": 700,
+
+				"dragDropEnabled": true,
+
+				"decorations": false,
+				"transparent": true,
+				"alwaysOnTop": false,
+				"resizable": true,
+				"shadow": false,
+				"skipTaskbar": true,
+				"center": true
 			}
 		],
 		"security": {
