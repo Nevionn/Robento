@@ -5,9 +5,15 @@ use tauri::{
     WindowEvent,
 };
 
+use tauri_plugin_global_shortcut::{
+    GlobalShortcutExt,
+    ShortcutState,
+};
+
 pub fn setup_tray(app: &mut tauri::App) -> tauri::Result<()> {
     let window = app.get_webview_window("main").unwrap();
     let window_hide = window.clone();
+
 
     window.on_window_event(move |event| {
         if let WindowEvent::CloseRequested { api, .. } = event {
@@ -15,6 +21,7 @@ pub fn setup_tray(app: &mut tauri::App) -> tauri::Result<()> {
             let _ = window_hide.hide();
         }
     });
+
 
     let show_item = MenuItem::with_id(
         app,
@@ -37,7 +44,7 @@ pub fn setup_tray(app: &mut tauri::App) -> tauri::Result<()> {
         &[&show_item, &quit_item],
     )?;
 
-    // Трей
+
     let _tray = TrayIconBuilder::new()
         .tooltip("Robento")
         .icon(app.default_window_icon().unwrap().clone())
@@ -59,6 +66,24 @@ pub fn setup_tray(app: &mut tauri::App) -> tauri::Result<()> {
             }
         })
         .build(app)?;
+
+
+    app.global_shortcut()
+        .on_shortcut("Alt+B", move |app, _shortcut, event| {
+            if event.state == ShortcutState::Pressed {
+                if let Some(window) = app.get_webview_window("main") {
+                    if let Ok(visible) = window.is_visible() {
+                        if visible {
+                            let _ = window.hide();
+                        } else {
+                            let _ = window.show();
+                            let _ = window.set_focus();
+                        }
+                    }
+                }
+            }
+        })
+        .map_err(|e| tauri::Error::Anyhow(e.into()))?;
 
     Ok(())
 }
