@@ -16,13 +16,21 @@ pub fn setup_tray(app: &mut tauri::App) -> tauri::Result<()> {
 
 
     window.on_window_event(move |event| {
-        if let WindowEvent::CloseRequested { api, .. } = event {
-            api.prevent_close();
-            let _ = window_hide.hide();
+        match event {
+            WindowEvent::CloseRequested { api, .. } => {
+                api.prevent_close();
+                let _ = window_hide.hide();
+            }
+
+            WindowEvent::Focused(false) => {
+                let _ = window_hide.hide();
+            }
+
+            _ => {}
         }
     });
 
-
+  
     let show_item = MenuItem::with_id(
         app,
         "show",
