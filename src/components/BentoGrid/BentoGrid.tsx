@@ -21,6 +21,7 @@ import { useBentoKeyboardShortcuts } from "../../hooks/useBentoKeyboardShortcuts
 import { useBentoShortcuts } from "../../hooks/useBentoShortcuts";
 
 import BentoGroupCard from "../BentoGroupCard/BentoGroupCard";
+import Hotkeys from "../Hotkeys/Hotkeys";
 import styles from "./BentoGrid.module.css";
 import { generateLayout, updateLayoutHeight } from "./layout";
 
@@ -325,7 +326,11 @@ export default function BentoGrid() {
 
 	return (
 		<section ref={containerRef} className={styles.wrapper}>
-			{mounted && !isInitialLoading && (
+			{isInitialLoading && null}
+
+			{!isInitialLoading && groups.length === 0 && <Hotkeys />}
+
+			{!isInitialLoading && groups.length > 0 && mounted && (
 				<DndContext
 					sensors={sensors}
 					collisionDetection={closestCenter}

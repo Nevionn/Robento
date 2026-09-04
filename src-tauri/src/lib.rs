@@ -9,7 +9,7 @@ use db_core::groups::{
     get_groups,
     update_group_title,
     update_groups_order,
-    delete_group,
+    delete_group
 };
 use db_core::shortcuts::{
     init_shortcuts_table,
@@ -58,7 +58,7 @@ pub fn run() {
             get_groups,
             update_group_title,
             update_groups_order,
-            delete_group
+            delete_group,
         ])
 
         .run(tauri::generate_context!())

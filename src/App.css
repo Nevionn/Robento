@@ -1,23 +1,40 @@
-html,
+html {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+	background: transparent;
+}
+
 body {
 	margin: 0;
 	padding: 0;
 	width: 100%;
 	height: 100%;
-	background-color: #1e1e2e; /* Catppuccin Mocha */
+	background: transparent;
+
 	font-family: var(--font-general);
 	scroll-behavior: smooth;
 	scrollbar-color: var(--color-scroll-bar);
+
+	border-radius: 12px;
+	overflow: hidden;
 }
 
 body::before {
 	content: "";
 	position: fixed;
 	inset: 0;
-	border: 1px solid rgba(108, 112, 134, 0.45); /* Overlay0 */
+
+	background: #1e1e2e;
+	border: 2px solid rgba(108, 112, 134, 0.45);
+	border-radius: 12px;
 	box-shadow: inset 0 0 20px rgba(17, 17, 27, 0.35);
+
+	box-sizing: border-box;
 	pointer-events: none;
-	z-index: 100;
+
+	z-index: -1;
 }
 
 .container {

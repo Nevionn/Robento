@@ -11,26 +11,30 @@ use tauri_plugin_global_shortcut::{
 };
 
 pub fn setup_tray(app: &mut tauri::App) -> tauri::Result<()> {
-    let window = app.get_webview_window("main").unwrap();
-    let window_hide = window.clone();
 
+    let window = app
+        .get_webview_window("main")
+        .unwrap();
+
+    let window_hide = window.clone();
 
     window.on_window_event(move |event| {
         match event {
+
             WindowEvent::CloseRequested { api, .. } => {
                 api.prevent_close();
+
                 let _ = window_hide.hide();
             }
 
-            WindowEvent::Focused(false) => {
-                let _ = window_hide.hide();
-            }
+            // WindowEvent::Focused(false) => {
+            //     let _ = window_hide.hide();
+            // }
 
             _ => {}
         }
     });
 
-  
     let show_item = MenuItem::with_id(
         app,
         "show",
@@ -49,18 +53,28 @@ pub fn setup_tray(app: &mut tauri::App) -> tauri::Result<()> {
 
     let menu = Menu::with_items(
         app,
-        &[&show_item, &quit_item],
+        &[
+            &show_item,
+            &quit_item,
+        ],
     )?;
 
 
     let _tray = TrayIconBuilder::new()
         .tooltip("Robento")
-        .icon(app.default_window_icon().unwrap().clone())
+        .icon(
+            app.default_window_icon()
+                .unwrap()
+                .clone(),
+        )
         .menu(&menu)
         .on_menu_event(|app, event| {
             match event.id().as_ref() {
+
                 "show" => {
-                    if let Some(window) = app.get_webview_window("main") {
+                    if let Some(window) =
+                        app.get_webview_window("main")
+                    {
                         let _ = window.show();
                         let _ = window.set_focus();
                     }
@@ -77,10 +91,20 @@ pub fn setup_tray(app: &mut tauri::App) -> tauri::Result<()> {
 
 
     app.global_shortcut()
-        .on_shortcut("Alt+B", move |app, _shortcut, event| {
-            if event.state == ShortcutState::Pressed {
-                if let Some(window) = app.get_webview_window("main") {
-                    if let Ok(visible) = window.is_visible() {
+        .on_shortcut(
+            "Alt+B",
+            move |app, _shortcut, event| {
+
+                if event.state != ShortcutState::Pressed {
+                    return;
+                }
+
+                if let Some(window) =
+                    app.get_webview_window("main")
+                {
+                    if let Ok(visible) =
+                        window.is_visible()
+                    {
                         if visible {
                             let _ = window.hide();
                         } else {
@@ -89,8 +113,8 @@ pub fn setup_tray(app: &mut tauri::App) -> tauri::Result<()> {
                         }
                     }
                 }
-            }
-        })
+            },
+        )
         .map_err(|e| tauri::Error::Anyhow(e.into()))?;
 
     Ok(())
