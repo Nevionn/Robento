@@ -2,9 +2,11 @@ import { useEffect } from "react";
 
 interface UseBentoKeyboardShortcutsParams {
 	focusedGroupId: string | null;
+	focusedShortcutId: string | null;
 	onCreateGroup(): void;
 	onEditGroup(id: string): void;
 	onDeleteGroup(id: string): void;
+	onDeleteShortcut(id: string): void;
 }
 
 /**
@@ -12,7 +14,7 @@ interface UseBentoKeyboardShortcutsParams {
  *
  * Shift + G — создать новую группу.
  * R        — редактировать выбранную группу.
- * Shift + R — удалить выбранную группу.
+ * Shift + R — удалить выбранную группу / ярлык.
  *
  * Хук не управляет состоянием групп.
  * Определяет клавиши и вызывает переданные callbacks.
@@ -20,9 +22,11 @@ interface UseBentoKeyboardShortcutsParams {
 
 export function useBentoKeyboardShortcuts({
 	focusedGroupId,
+	focusedShortcutId,
 	onCreateGroup,
 	onEditGroup,
 	onDeleteGroup,
+	onDeleteShortcut,
 }: UseBentoKeyboardShortcutsParams) {
 	useEffect(() => {
 		function handleKeyDown(event: KeyboardEvent) {
@@ -37,20 +41,25 @@ export function useBentoKeyboardShortcuts({
 				return;
 			}
 
-			// Shift + R — удалить выбранную группу
+			// Shift + R — удалить выбранный объект
 			if (event.shiftKey && event.key.toLowerCase() === "r") {
-				if (!focusedGroupId) {
+				event.preventDefault();
+
+				if (focusedShortcutId) {
+					onDeleteShortcut(focusedShortcutId);
 					return;
 				}
 
-				event.preventDefault();
-				onDeleteGroup(focusedGroupId);
+				if (focusedGroupId) {
+					onDeleteGroup(focusedGroupId);
+				}
+
 				return;
 			}
 
 			// R — редактировать выбранную группу
 			if (event.key.toLowerCase() === "r") {
-				if (!focusedGroupId) {
+				if (!focusedGroupId || focusedShortcutId) {
 					return;
 				}
 
@@ -64,5 +73,12 @@ export function useBentoKeyboardShortcuts({
 		return () => {
 			window.removeEventListener("keydown", handleKeyDown);
 		};
-	}, [focusedGroupId, onCreateGroup, onEditGroup, onDeleteGroup]);
+	}, [
+		focusedGroupId,
+		focusedShortcutId,
+		onCreateGroup,
+		onEditGroup,
+		onDeleteGroup,
+		onDeleteShortcut,
+	]);
 }

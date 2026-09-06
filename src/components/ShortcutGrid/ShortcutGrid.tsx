@@ -1,10 +1,13 @@
 import { rectSortingStrategy, SortableContext } from "@dnd-kit/sortable";
+
 import type { Shortcut } from "../BentoGrid/BentoGrid";
+
 import SortableShortcut from "../SortableShortcut/SortableShortcut";
 
 interface Props {
 	groupId: string;
 	shortcuts: Shortcut[];
+	onShortcutFocus(shortcutId: string | null): void;
 }
 
 /**
@@ -13,13 +16,12 @@ interface Props {
  * Отвечает за:
  * - отображение ярлыков;
  * - сортировку ярлыков внутри группы;
- * - передачу нового порядка в BentoGrid.
+ * - передачу фокуса выбранного ярлыка.
  *
  * Перенос между группами обрабатывается
  * родительским DndContext.
  */
-
-export default function ShortcutGrid({ shortcuts }: Props) {
+export default function ShortcutGrid({ shortcuts, onShortcutFocus }: Props) {
 	return (
 		<SortableContext
 			items={shortcuts.map((item) => item.id)}
@@ -32,6 +34,7 @@ export default function ShortcutGrid({ shortcuts }: Props) {
 					name={shortcut.name}
 					icon={shortcut.icon}
 					target={shortcut.target}
+					onShortcutFocus={onShortcutFocus}
 				/>
 			))}
 		</SortableContext>

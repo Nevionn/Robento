@@ -1,6 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { invoke } from "@tauri-apps/api/core";
+
 import styles from "../BentoGrid/BentoGrid.module.css";
 
 interface Props {
@@ -8,6 +9,8 @@ interface Props {
 	name: string;
 	icon: string | null;
 	target: string;
+
+	onShortcutFocus(shortcutId: string | null): void;
 }
 
 /**
@@ -17,7 +20,13 @@ interface Props {
  * через общий DndContext.
  */
 
-export default function SortableShortcut({ id, name, icon, target }: Props) {
+export default function SortableShortcut({
+	id,
+	name,
+	icon,
+	target,
+	onShortcutFocus,
+}: Props) {
 	const { setNodeRef, attributes, listeners, transform, isDragging } =
 		useSortable({
 			id,
@@ -41,10 +50,13 @@ export default function SortableShortcut({ id, name, icon, target }: Props) {
 				opacity: isDragging ? 0.5 : 1,
 				zIndex: isDragging ? 10 : undefined,
 			}}
+			onMouseEnter={() => {
+				onShortcutFocus(id);
+			}}
 			onClick={handleClick}
 		>
 			{icon ? (
-				<img src={icon} className={styles.icon} />
+				<img src={icon} className={styles.icon} alt="" />
 			) : (
 				<div className={styles.icon} />
 			)}

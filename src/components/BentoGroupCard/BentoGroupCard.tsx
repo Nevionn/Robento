@@ -7,7 +7,8 @@ interface Props {
 	group: BentoGroup;
 	onTitleChange(id: string, title: string): void;
 	onSubmitGroup(id: string, title: string): void;
-	onFocus(): void;
+	onGroupFocus(): void;
+	onShortcutFocus(shortcutId: string | null): void;
 	onDragOver(id: string): void;
 	onDragLeave(): void;
 	dropTargetGroup: string | null;
@@ -20,13 +21,15 @@ interface Props {
  * - отображение заголовка группы;
  * - редактирование названия группы;
  * - отображение ярлыков группы.
+ * - передачу фокуса выбранного ярлыка.
  */
 
 export default function BentoGroupCard({
 	group,
 	onTitleChange,
 	onSubmitGroup,
-	onFocus,
+	onGroupFocus,
+	onShortcutFocus,
 	onDragOver,
 	onDragLeave,
 }: Props) {
@@ -46,9 +49,9 @@ export default function BentoGroupCard({
 			style={{
 				background: isOver ? "#4a4c7d" : undefined,
 			}}
-			onFocus={onFocus}
+			onFocus={onGroupFocus}
 			onMouseEnter={() => {
-				onFocus();
+				onGroupFocus();
 				onDragOver(group.id);
 			}}
 			onDragEnter={() => {
@@ -78,7 +81,11 @@ export default function BentoGroupCard({
 			</header>
 
 			<div className={styles.shortcuts}>
-				<ShortcutGrid groupId={group.id} shortcuts={group.shortcuts} />
+				<ShortcutGrid
+					groupId={group.id}
+					shortcuts={group.shortcuts}
+					onShortcutFocus={onShortcutFocus}
+				/>
 			</div>
 		</div>
 	);

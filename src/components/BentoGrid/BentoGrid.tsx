@@ -63,8 +63,13 @@ const initialGroups: BentoGroup[] = [];
 
 export default function BentoGrid() {
 	const { width, containerRef, mounted } = useContainerWidth();
+
 	const [groups, setGroups] = useState<BentoGroup[]>(initialGroups);
 	const [focusedGroupId, setFocusedGroupId] = useState<string | null>(null);
+	const [focusedShortcutId, setFocusedShortcutId] = useState<string | null>(
+		null,
+	);
+
 	const [dropTargetGroup, setDropTargetGroup] = useState<string | null>(null);
 	const [isDraggingShortcut, setIsDraggingShortcut] = useState(false);
 	const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -88,6 +93,7 @@ export default function BentoGrid() {
 		loadShortcuts,
 		applyLoadedShortcuts,
 		updateShortcutsOrder,
+		deleteShortcut,
 	} = useBentoShortcuts({
 		setGroups,
 		setLayout,
@@ -152,9 +158,11 @@ export default function BentoGrid() {
 
 	useBentoKeyboardShortcuts({
 		focusedGroupId,
+		focusedShortcutId,
 		onCreateGroup: addGroupDraft,
 		onEditGroup: startEditingGroup,
 		onDeleteGroup: deleteGroup,
+		onDeleteShortcut: deleteShortcut,
 	});
 
 	function handleGroupTitleChange(id: string, title: string) {
@@ -379,7 +387,14 @@ export default function BentoGrid() {
 									group={group}
 									onTitleChange={handleGroupTitleChange}
 									onSubmitGroup={submitGroupTitle}
-									onFocus={() => setFocusedGroupId(group.id)}
+									onGroupFocus={() => {
+										setFocusedGroupId(group.id);
+										setFocusedShortcutId(null);
+									}}
+									onShortcutFocus={(shortcutId) => {
+										setFocusedShortcutId(shortcutId);
+										setFocusedGroupId(group.id);
+									}}
 									onDragOver={(id) => {
 										dropTargetGroupRef.current = id;
 										setDropTargetGroup(id);
