@@ -1,6 +1,12 @@
 .wrapper {
 	width: 100%;
-	padding: 32px;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+.wrapper_withGroups {
+	width: 100%;
+	padding: 16px;
 	box-sizing: border-box;
 }
 
@@ -82,12 +88,6 @@
 .icon {
 	font-size: 26px;
 	line-height: 1;
-}
-
-@media (max-width: 900px) {
-	.wrapper {
-		padding: 16px;
-	}
 }
 
 @media (max-width: 420px) {

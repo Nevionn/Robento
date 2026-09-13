@@ -2,6 +2,7 @@ use serde::Serialize;
 use sqlx::{Row, SqlitePool};
 use tauri::State;
 use uuid::{Timestamp, Uuid};
+use tauri::Emitter;
 
 const RESET_DB: bool = false;
 const PRINT_SCHEMA: bool = false;
@@ -58,6 +59,7 @@ pub struct GroupDto {
 
 #[tauri::command]
 pub async fn create_group(
+    app: tauri::AppHandle,
     pool: State<'_, SqlitePool>,
     title: String,
 ) -> Result<GroupDto, String> {
@@ -101,6 +103,9 @@ pub async fn create_group(
     .execute(pool.inner())
     .await
     .map_err(|e| e.to_string())?;
+
+    app.emit("group-created", ())
+        .map_err(|e| e.to_string())?;
 
     Ok(GroupDto {
         id,
@@ -210,6 +215,7 @@ pub async fn update_groups_order(
 
 #[tauri::command]
 pub async fn delete_group(
+    app: tauri::AppHandle,
     pool: State<'_, SqlitePool>,
     id: String,
 ) -> Result<(), String> {
@@ -224,5 +230,28 @@ pub async fn delete_group(
     .await
     .map_err(|e| e.to_string())?;
 
+    app.emit("group-deleted", ())
+        .map_err(|e| e.to_string())?;
+
     Ok(())
+}
+
+#[tauri::command]
+pub async fn has_groups(
+    pool: State<'_, SqlitePool>,
+) -> Result<bool, String> {
+    let exists: bool = sqlx::query_scalar(
+        r#"
+        SELECT EXISTS(
+            SELECT 1
+            FROM Groups
+            LIMIT 1
+        )
+        "#,
+    )
+    .fetch_one(pool.inner())
+    .await
+    .map_err(|e| e.to_string())?;
+
+    Ok(exists)
 }

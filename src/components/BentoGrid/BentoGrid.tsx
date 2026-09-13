@@ -333,7 +333,12 @@ export default function BentoGrid() {
 	}, []);
 
 	return (
-		<section ref={containerRef} className={styles.wrapper}>
+		<section
+			ref={containerRef}
+			className={`${styles.wrapper} ${
+				groups.length > 0 ? styles.wrapper_withGroups : ""
+			}`}
+		>
 			{isInitialLoading && null}
 
 			{!isInitialLoading && groups.length === 0 && <Hotkeys />}

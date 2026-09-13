@@ -1,10 +1,19 @@
+import { useState } from "react";
 import "./App.css";
-import BentoGrid from "./components/BentoGrid/BentoGrid";
+
+import NavBar from "./components/NavBar/NavBar";
+import View from "./components/View/View";
+
+import type { ViewName } from "./types/View";
 
 function App() {
+	const [activeView, setActiveView] = useState<ViewName>("grid");
+
 	return (
 		<main className="container">
-			<BentoGrid />
+			<NavBar activeView={activeView} setActiveView={setActiveView} />
+
+			<View activeView={activeView} />
 		</main>
 	);
 }

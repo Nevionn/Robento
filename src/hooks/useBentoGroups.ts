@@ -231,6 +231,19 @@ export function useBentoGroups({ setGroups, setLayout }: UseBentoGroupsParams) {
 		[setGroups, setLayout],
 	);
 
+	/**
+	 * Проверяет наличие хотябы 1 группы.
+	 */
+
+	const checkHasGroups = useCallback(async () => {
+		try {
+			return await invoke<boolean>("has_groups");
+		} catch (error) {
+			console.error("Не удалось проверить наличие групп:", error);
+			return false;
+		}
+	}, []);
+
 	return {
 		addGroupDraft,
 		persistGroup,
@@ -239,5 +252,6 @@ export function useBentoGroups({ setGroups, setLayout }: UseBentoGroupsParams) {
 		submitGroupTitle,
 		updateGroupsOrder,
 		deleteGroup,
+		checkHasGroups,
 	};
 }

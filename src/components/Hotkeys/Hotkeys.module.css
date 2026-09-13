@@ -1,6 +1,6 @@
 .wrapper {
 	width: 100%;
-	min-height: calc(100vh - 64px);
+	min-height: calc(100vh - 112px);
 	box-sizing: border-box;
 
 	display: flex;
