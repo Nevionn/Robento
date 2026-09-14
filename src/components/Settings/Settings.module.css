@@ -1,0 +1,135 @@
+.wrapper {
+	width: 100%;
+	padding: 16px;
+
+	color: var(--text-secondary);
+	box-sizing: border-box;
+}
+
+.section {
+	width: 100%;
+	max-width: 640px;
+	margin: 0 auto;
+	padding: 18px;
+
+	background: rgba(30, 30, 46, 0.9);
+	border: 1px solid rgba(108, 112, 134, 0.45);
+	border-radius: 10px;
+
+	box-shadow:
+		0 4px 12px rgba(17, 17, 27, 0.25),
+		inset 0 0 12px rgba(17, 17, 27, 0.2);
+
+	box-sizing: border-box;
+}
+
+.title {
+	margin: 0 0 16px;
+
+	color: var(--text-primary);
+	font-family: var(--font-title);
+	font-size: 20px;
+	font-weight: normal;
+}
+
+.option {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+
+	min-height: 42px;
+	padding: 8px 10px;
+
+	border-radius: 7px;
+
+	color: var(--text-secondary);
+	font-family: var(--font-general);
+	font-size: 13px;
+
+	cursor: pointer;
+
+	transition:
+		background 0.2s ease,
+		color 0.2s ease;
+}
+
+.option:hover {
+	background: rgba(49, 50, 68, 0.7);
+	color: var(--text-primary);
+}
+
+.option input {
+	position: absolute;
+
+	width: 1px;
+	height: 1px;
+
+	opacity: 0;
+	pointer-events: none;
+}
+
+.checkbox {
+	position: relative;
+
+	flex: 0 0 16px;
+
+	width: 16px;
+	height: 16px;
+
+	background: #1e1e2e;
+	border: 1px solid rgba(108, 112, 134, 0.7);
+	border-radius: 4px;
+
+	box-sizing: border-box;
+
+	transition:
+		background 0.2s ease,
+		border-color 0.2s ease,
+		box-shadow 0.2s ease;
+}
+
+.checkbox::after {
+	content: "";
+
+	position: absolute;
+
+	left: 4px;
+	top: 1px;
+
+	width: 5px;
+	height: 9px;
+
+	border-right: 2px solid #2ce98e;
+	border-bottom: 2px solid #2ce98e;
+
+	opacity: 0;
+
+	transform: rotate(45deg) scale(0.7);
+
+	transition:
+		opacity 0.15s ease,
+		transform 0.15s ease;
+}
+
+.option input:checked + .checkbox {
+	background: #313244;
+	border-color: rgba(137, 180, 250, 0.8);
+
+	box-shadow:
+		0 0 6px rgba(137, 180, 250, 0.15),
+		inset 0 0 6px rgba(17, 17, 27, 0.25);
+}
+
+.option input:checked + .checkbox::after {
+	opacity: 1;
+	transform: rotate(45deg) scale(1);
+}
+
+.option:hover .checkbox {
+	border-color: rgba(137, 180, 250, 0.7);
+}
+
+.option:has(input:focus-visible) .checkbox {
+	outline: 2px solid rgba(137, 180, 250, 0.35);
+	outline-offset: 2px;
+}

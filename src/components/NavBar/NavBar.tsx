@@ -13,7 +13,7 @@ type NavBarProps = {
 
 /**
  * Панель навигации между основными представлениями приложения.
- * Сетка, горячие клавиши, настройки.
+ * Сетка, настройки, горячие клавиши.
  *
  * Состояние синхронизируется с событиями создания и удаления групп.
  */
@@ -59,7 +59,16 @@ export default function NavBar({ activeView, setActiveView }: NavBarProps) {
 				}`}
 				onClick={() => setActiveView("grid")}
 			>
-				Grid
+				Сетка
+			</button>
+
+			<button
+				className={`${styles.button} ${
+					activeView === "settings" ? styles.active : ""
+				}`}
+				onClick={() => setActiveView("settings")}
+			>
+				Настройки
 			</button>
 
 			{hasGroups && (
@@ -69,7 +78,7 @@ export default function NavBar({ activeView, setActiveView }: NavBarProps) {
 					}`}
 					onClick={() => setActiveView("hotkeys")}
 				>
-					Hotkeys
+					Горячие клавиши
 				</button>
 			)}
 		</nav>

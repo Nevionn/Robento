@@ -1,1 +1,1 @@
-export type ViewName = "grid" | "hotkeys";
+export type ViewName = "grid" | "hotkeys" | "settings";
