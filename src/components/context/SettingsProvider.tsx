@@ -54,6 +54,7 @@ const SettingsContext = createContext<SettingsContextValue | null>(null);
  *
  * Текущая передача:
  * localStorage → Settings Store → [hideOnBlur, gameMode] → Rust AppSettings
+ *                               → [launchOnStartup] → Windows Registry
  */
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
@@ -88,6 +89,16 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 		setSettings(next);
 
 		localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+
+		if (key === "launchOnStartup") {
+			try {
+				await invoke("set_launch_on_startup", {
+					value,
+				});
+			} catch (error) {
+				console.error("Не удалось изменить автозапуск Robento:", error);
+			}
+		}
 
 		if (key === "hideOnBlur") {
 			try {

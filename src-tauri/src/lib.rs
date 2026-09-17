@@ -1,5 +1,6 @@
 mod fs_core;
 mod db_core;
+mod os_core;
 mod tray;
 mod settings;
 
@@ -21,6 +22,10 @@ use db_core::shortcuts::{
     get_shortcuts,
     update_shortcuts_order,
     delete_shortcut,
+};
+
+use os_core::autostart::{
+    set_launch_on_startup
 };
 
 use settings::{
@@ -82,7 +87,9 @@ pub fn run() {
 
             get_hide_on_blur,
             set_hide_on_blur,
-            set_game_mode
+            set_game_mode,
+
+            set_launch_on_startup
         ])
 
         .run(tauri::generate_context!())
