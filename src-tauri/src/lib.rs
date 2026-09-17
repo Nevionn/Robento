@@ -27,6 +27,7 @@ use settings::{
     AppSettings,
     get_hide_on_blur,
     set_hide_on_blur,
+    set_game_mode,
 };
 
 use fs_core::shortcut::{
@@ -80,7 +81,8 @@ pub fn run() {
             has_groups,
 
             get_hide_on_blur,
-            set_hide_on_blur
+            set_hide_on_blur,
+            set_game_mode
         ])
 
         .run(tauri::generate_context!())

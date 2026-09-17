@@ -53,7 +53,7 @@ const SettingsContext = createContext<SettingsContextValue | null>(null);
  * дочерним компонентам доступ к настройкам и их изменению.
  *
  * Текущая передача:
- * localStorage → Settings Store → hideOnBlur → Rust AppSettings
+ * localStorage → Settings Store → [hideOnBlur, gameMode] → Rust AppSettings
  */
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
@@ -67,6 +67,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 				"Не удалось синхронизировать настройку скрытия при потере фокуса:",
 				error,
 			);
+		});
+
+		invoke("set_game_mode", {
+			value: settings.general.gameMode,
+		}).catch((error) => {
+			console.error("Не удалось синхронизировать игровой режим:", error);
 		});
 	}, []);
 
@@ -93,6 +99,16 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 					"Не удалось изменить настройку скрытия при потере фокуса:",
 					error,
 				);
+			}
+		}
+
+		if (key === "gameMode") {
+			try {
+				await invoke("set_game_mode", {
+					value,
+				});
+			} catch (error) {
+				console.error("Не удалось изменить игровой режим:", error);
 			}
 		}
 	}

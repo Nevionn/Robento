@@ -13,7 +13,6 @@ use tauri_plugin_global_shortcut::{
 use crate::settings::AppSettings;
 
 pub fn setup_tray(app: &mut tauri::App) -> tauri::Result<()> {
-
     let window = app
         .get_webview_window("main")
         .unwrap();
@@ -22,10 +21,8 @@ pub fn setup_tray(app: &mut tauri::App) -> tauri::Result<()> {
 
     window.on_window_event(move |event| {
         match event {
-
             WindowEvent::CloseRequested { api, .. } => {
                 api.prevent_close();
-
                 let _ = window_hide.hide();
             }
 
@@ -72,7 +69,6 @@ pub fn setup_tray(app: &mut tauri::App) -> tauri::Result<()> {
         ],
     )?;
 
-
     let _tray = TrayIconBuilder::new()
         .tooltip("Robento")
         .icon(
@@ -83,7 +79,6 @@ pub fn setup_tray(app: &mut tauri::App) -> tauri::Result<()> {
         .menu(&menu)
         .on_menu_event(|app, event| {
             match event.id().as_ref() {
-
                 "show" => {
                     if let Some(window) =
                         app.get_webview_window("main")
@@ -102,13 +97,23 @@ pub fn setup_tray(app: &mut tauri::App) -> tauri::Result<()> {
         })
         .build(app)?;
 
-
     app.global_shortcut()
         .on_shortcut(
             "Alt+B",
             move |app, _shortcut, event| {
-
                 if event.state != ShortcutState::Pressed {
+                    return;
+                }
+
+                let settings = app.state::<AppSettings>();
+
+                let game_mode = settings
+                    .game_mode
+                    .lock()
+                    .map(|value| *value)
+                    .unwrap_or(false);
+
+                if game_mode {
                     return;
                 }
 
