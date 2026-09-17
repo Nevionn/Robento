@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./App.css";
+import { SettingsProvider } from "./components/context/SettingsProvider";
 
 import NavBar from "./components/NavBar/NavBar";
 import View from "./components/View/View";
@@ -10,11 +11,13 @@ function App() {
 	const [activeView, setActiveView] = useState<ViewName>("grid");
 
 	return (
-		<main className="container">
-			<NavBar activeView={activeView} setActiveView={setActiveView} />
+		<SettingsProvider>
+			<main className="container">
+				<NavBar activeView={activeView} setActiveView={setActiveView} />
 
-			<View activeView={activeView} />
-		</main>
+				<View activeView={activeView} />
+			</main>
+		</SettingsProvider>
 	);
 }
 

@@ -1,57 +1,14 @@
-import { useState } from "react";
-
+import { useSettings } from "../context/SettingsProvider";
 import styles from "./Settings.module.css";
 
-type Settings = {
-	general: {
-		launchOnStartup: boolean;
-		hideOnBlur: boolean;
-		gameMode: boolean;
-	};
-};
-
-const STORAGE_KEY = "robento-settings";
-
-const defaultSettings: Settings = {
-	general: {
-		launchOnStartup: false,
-		hideOnBlur: false,
-		gameMode: false,
-	},
-};
-
-function loadSettings(): Settings {
-	const stored = localStorage.getItem(STORAGE_KEY);
-
-	if (!stored) {
-		return defaultSettings;
-	}
-
-	try {
-		return JSON.parse(stored) as Settings;
-	} catch {
-		return defaultSettings;
-	}
-}
+/**
+ * Отображает настройки приложения и обрабатывает их изменение.
+ *
+ * Получает настройки и функцию обновления из SettingsProvider.
+ */
 
 export default function Settings() {
-	const [settings, setSettings] = useState<Settings>(loadSettings);
-
-	function updateGeneral(key: keyof Settings["general"], value: boolean) {
-		setSettings((current) => {
-			const next = {
-				...current,
-				general: {
-					...current.general,
-					[key]: value,
-				},
-			};
-
-			localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-
-			return next;
-		});
-	}
+	const { settings, updateGeneral } = useSettings();
 
 	return (
 		<section className={styles.wrapper}>
@@ -66,7 +23,9 @@ export default function Settings() {
 							updateGeneral("launchOnStartup", event.target.checked)
 						}
 					/>
+
 					<span className={styles.checkbox} />
+
 					<span>Запускать Robento при запуске системы</span>
 				</label>
 
@@ -78,7 +37,9 @@ export default function Settings() {
 							updateGeneral("hideOnBlur", event.target.checked)
 						}
 					/>
+
 					<span className={styles.checkbox} />
+
 					<span>Скрывать Robento, если потерян фокус</span>
 				</label>
 
@@ -90,7 +51,9 @@ export default function Settings() {
 							updateGeneral("gameMode", event.target.checked)
 						}
 					/>
+
 					<span className={styles.checkbox} />
+
 					<span>Игровой режим</span>
 				</label>
 			</div>

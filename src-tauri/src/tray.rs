@@ -10,6 +10,8 @@ use tauri_plugin_global_shortcut::{
     ShortcutState,
 };
 
+use crate::settings::AppSettings;
+
 pub fn setup_tray(app: &mut tauri::App) -> tauri::Result<()> {
 
     let window = app
@@ -27,9 +29,20 @@ pub fn setup_tray(app: &mut tauri::App) -> tauri::Result<()> {
                 let _ = window_hide.hide();
             }
 
-            // WindowEvent::Focused(false) => {
-            //     let _ = window_hide.hide();
-            // }
+            WindowEvent::Focused(false) => {
+                let app_handle = window_hide.app_handle();
+                let settings = app_handle.state::<AppSettings>();
+
+                let hide_on_blur = settings
+                    .hide_on_blur
+                    .lock()
+                    .map(|value| *value)
+                    .unwrap_or(false);
+
+                if hide_on_blur {
+                    let _ = window_hide.hide();
+                }
+            }
 
             _ => {}
         }
