@@ -3,10 +3,12 @@ import { useEffect } from "react";
 interface UseBentoKeyboardShortcutsParams {
 	focusedGroupId: string | null;
 	focusedShortcutId: string | null;
+
 	onCreateGroup(): void;
 	onEditGroup(id: string): void;
 	onDeleteGroup(id: string): void;
 	onDeleteShortcut(id: string): void;
+	onAddShortcut(): void;
 }
 
 /**
@@ -15,6 +17,7 @@ interface UseBentoKeyboardShortcutsParams {
  * Shift + G — создать новую группу.
  * R        — редактировать выбранную группу.
  * Shift + R — удалить выбранную группу / ярлык.
+ * Shift + F — создать ярлык в активной группе.
  *
  * Хук не управляет состоянием групп.
  * Определяет клавиши и вызывает переданные callbacks.
@@ -27,6 +30,7 @@ export function useBentoKeyboardShortcuts({
 	onEditGroup,
 	onDeleteGroup,
 	onDeleteShortcut,
+	onAddShortcut,
 }: UseBentoKeyboardShortcutsParams) {
 	useEffect(() => {
 		function handleKeyDown(event: KeyboardEvent) {
@@ -57,6 +61,17 @@ export function useBentoKeyboardShortcuts({
 				return;
 			}
 
+			// Shift + F — добавить ярлык в активную группу
+			if (event.shiftKey && event.key.toLowerCase() === "f") {
+				if (!focusedGroupId || focusedShortcutId) {
+					return;
+				}
+
+				event.preventDefault();
+				onAddShortcut();
+				return;
+			}
+
 			// R — редактировать выбранную группу
 			if (event.key.toLowerCase() === "r") {
 				if (!focusedGroupId || focusedShortcutId) {
@@ -80,5 +95,6 @@ export function useBentoKeyboardShortcuts({
 		onEditGroup,
 		onDeleteGroup,
 		onDeleteShortcut,
+		onAddShortcut,
 	]);
 }

@@ -10,7 +10,7 @@ const hotkeys = [
 		keys: ["R"],
 	},
 	{
-		description: "Удалить выбранную группу",
+		description: "Удалить выбранную группу/ярлык",
 		keys: ["Shift", "R"],
 	},
 	{

@@ -38,6 +38,7 @@ use settings::{
 use fs_core::shortcut::{
     launch_shortcut,
     parse_shortcut,
+    pick_executable,
 };
 
 use tauri::Manager;
@@ -51,6 +52,7 @@ pub fn run() {
         .plugin(
             tauri_plugin_global_shortcut::Builder::new().build()
         )
+        .plugin(tauri_plugin_dialog::init())
 
         .setup(|app| {
             let handle = app.handle().clone();
@@ -72,6 +74,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             parse_shortcut,
             launch_shortcut,
+            pick_executable,
 
             create_shortcut,
             get_shortcuts,

@@ -163,7 +163,22 @@ export default function BentoGrid() {
 		onEditGroup: startEditingGroup,
 		onDeleteGroup: deleteGroup,
 		onDeleteShortcut: deleteShortcut,
+		onAddShortcut: handleAddShortcut,
 	});
+
+	async function handleAddShortcut() {
+		if (!focusedGroupId) {
+			return;
+		}
+
+		const shortcut = await invoke<Shortcut | null>("pick_executable");
+
+		if (!shortcut) {
+			return;
+		}
+
+		await createShortcut(focusedGroupId, shortcut);
+	}
 
 	function handleGroupTitleChange(id: string, title: string) {
 		setGroups((prev) =>
