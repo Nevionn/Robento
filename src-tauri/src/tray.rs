@@ -105,24 +105,25 @@ pub fn setup_tray(app: &mut tauri::App) -> tauri::Result<()> {
                     return;
                 }
 
-                let settings = app.state::<AppSettings>();
-
-                let game_mode = settings
-                    .game_mode
-                    .lock()
-                    .map(|value| *value)
-                    .unwrap_or(false);
-
-                if game_mode {
-                    return;
-                }
-
                 if let Some(window) =
                     app.get_webview_window("main")
                 {
                     if let Ok(visible) =
                         window.is_visible()
                     {
+                        let settings =
+                            app.state::<AppSettings>();
+
+                        let game_mode = settings
+                            .game_mode
+                            .lock()
+                            .map(|value| *value)
+                            .unwrap_or(false);
+
+                        if game_mode && !visible {
+                            return;
+                        }
+
                         if visible {
                             let _ = window.hide();
                         } else {
