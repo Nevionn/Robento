@@ -53,7 +53,10 @@ export default function SortableShortcut({
 			onMouseEnter={() => {
 				onShortcutFocus(id);
 			}}
-			onClick={handleClick}
+			onClick={(event) => {
+				event.stopPropagation();
+				void handleClick();
+			}}
 		>
 			{icon ? (
 				<img src={icon} className={styles.icon} alt="" />

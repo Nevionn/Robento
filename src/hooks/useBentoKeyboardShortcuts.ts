@@ -34,7 +34,16 @@ export function useBentoKeyboardShortcuts({
 }: UseBentoKeyboardShortcutsParams) {
 	useEffect(() => {
 		function handleKeyDown(event: KeyboardEvent) {
-			if (event.repeat) {
+			if (event.repeat) return;
+
+			const target = event.target;
+
+			if (
+				target instanceof HTMLInputElement ||
+				target instanceof HTMLTextAreaElement ||
+				target instanceof HTMLSelectElement ||
+				(target instanceof HTMLElement && target.isContentEditable)
+			) {
 				return;
 			}
 

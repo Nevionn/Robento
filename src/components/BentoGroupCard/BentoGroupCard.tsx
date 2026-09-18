@@ -49,9 +49,8 @@ export default function BentoGroupCard({
 			style={{
 				background: isOver ? "#4a4c7d" : undefined,
 			}}
-			onFocus={onGroupFocus}
+			onClick={onGroupFocus}
 			onMouseEnter={() => {
-				onGroupFocus();
 				onDragOver(group.id);
 			}}
 			onDragEnter={() => {

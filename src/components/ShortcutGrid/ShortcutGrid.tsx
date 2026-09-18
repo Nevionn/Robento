@@ -21,6 +21,7 @@ interface Props {
  * Перенос между группами обрабатывается
  * родительским DndContext.
  */
+
 export default function ShortcutGrid({ shortcuts, onShortcutFocus }: Props) {
 	return (
 		<SortableContext
