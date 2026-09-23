@@ -78,7 +78,7 @@ export default function NavBar({ activeView, setActiveView }: NavBarProps) {
 					}`}
 					onClick={() => setActiveView("hotkeys")}
 				>
-					Горячие клавиши
+					Клавиши
 				</button>
 			)}
 		</nav>
