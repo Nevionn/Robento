@@ -1,7 +1,7 @@
 import { useDroppable } from "@dnd-kit/core";
 import type { BentoGroup } from "../BentoGrid/BentoGrid";
-import styles from "../BentoGrid/BentoGrid.module.css";
 import ShortcutGrid from "../ShortcutGrid/ShortcutGrid";
+import styles from "./BentoGroupCard.module.css";
 
 interface Props {
 	group: BentoGroup;

@@ -1,60 +1,43 @@
+.name_shortcut {
+	letter-spacing: 1.4px;
+	color: var(--shortcut-text);
+	font-family: var(--font-general);
+	font-size: 13px;
+	font-weight: 600;
+}
+
 .shortcut {
 	width: 100%;
-
-	aspect-ratio: 1 / 1;
-
+	min-height: 64px;
 	display: flex;
-
 	flex-direction: column;
-
 	align-items: center;
-
 	justify-content: center;
-
-	gap: 8px;
+	gap: 6px;
 
 	border: none;
+	border-radius: 14px;
+	background: var(--shortcut-background);
 
-	border-radius: 16px;
-
-	background: #45475a;
-
-	color: #bac2de;
-
-	font-family: inherit;
-
-	font-size: 13px;
-
-	font-weight: 600;
-
-	cursor: grab;
-
-	user-select: none;
-
-	touch-action: none;
-
-	will-change: transform;
-
+	cursor: pointer;
 	transition:
-		background 160ms ease,
-		transform 160ms ease;
+		background 200ms ease,
+		transform 200ms ease;
 }
-
-
-.shortcut:active {
-	cursor: grabbing;
-}
-
 
 .shortcut:hover {
-	background: #585b70;
-
-	color: #cdd6f4;
+	background: var(--shortcut-hover-background);
+	color: var(--shortcut-hover-text);
+	transform: scale(1.03);
 }
-
 
 .icon {
 	font-size: 26px;
-
 	line-height: 1;
+}
+
+@media (max-width: 420px) {
+	.shortcuts {
+		grid-template-columns: 1fr;
+	}
 }

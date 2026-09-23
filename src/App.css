@@ -69,9 +69,20 @@ body::before {
 	--font-description: "WDXL Lubrifont TC", sans-serif;
 	--font-title: "Impact Regular", sans-serif;
 
+	/* Цвета */
 	--text-primary: #cdd6f4;
 	--text-secondary: rgb(138, 144, 211);
 	--text-muted: #a6adc8;
+
+	--card-group-background: #313244;
+	--card-group-border: rgba(108, 112, 134, 0.35);
+	--card-group-hover-border: rgba(205, 214, 244, 0.35);
+	--card-group-title: #cdd6f4;
+
+	--shortcut-background: #45475a;
+	--shortcut-text: #bac2de;
+	--shortcut-hover-background: #585b70;
+	--shortcut-hover-text: #cdd6f4;
 
 	--color-scroll-bar: #313244 #1e1e2e;
 }

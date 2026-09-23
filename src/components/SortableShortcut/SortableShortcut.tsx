@@ -2,7 +2,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { invoke } from "@tauri-apps/api/core";
 
-import styles from "../BentoGrid/BentoGrid.module.css";
+import styles from "./SortableShortcut.module.css";
 
 interface Props {
 	id: string;
@@ -64,7 +64,7 @@ export default function SortableShortcut({
 				<div className={styles.icon} />
 			)}
 
-			<span>{name}</span>
+			<span className={styles.name_shortcut}>{name}</span>
 		</button>
 	);
 }
