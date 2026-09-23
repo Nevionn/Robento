@@ -41,3 +41,16 @@
 		grid-template-columns: 1fr;
 	}
 }
+
+.dimmed {
+	opacity: 0.25;
+	filter: grayscale(0.8);
+}
+
+.match {
+	background: #3f6f52;
+}
+
+.match .name_shortcut {
+	color: #a6e3a1;
+}

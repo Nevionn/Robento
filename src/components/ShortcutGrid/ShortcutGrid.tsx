@@ -7,6 +7,7 @@ import SortableShortcut from "../SortableShortcut/SortableShortcut";
 interface Props {
 	groupId: string;
 	shortcuts: Shortcut[];
+	searchQuery: string;
 	onShortcutFocus(shortcutId: string | null): void;
 }
 
@@ -22,7 +23,11 @@ interface Props {
  * родительским DndContext.
  */
 
-export default function ShortcutGrid({ shortcuts, onShortcutFocus }: Props) {
+export default function ShortcutGrid({
+	shortcuts,
+	searchQuery,
+	onShortcutFocus,
+}: Props) {
 	return (
 		<SortableContext
 			items={shortcuts.map((item) => item.id)}
@@ -35,6 +40,7 @@ export default function ShortcutGrid({ shortcuts, onShortcutFocus }: Props) {
 					name={shortcut.name}
 					icon={shortcut.icon}
 					target={shortcut.target}
+					searchQuery={searchQuery}
 					onShortcutFocus={onShortcutFocus}
 				/>
 			))}

@@ -9,3 +9,8 @@
 	padding: 16px;
 	box-sizing: border-box;
 }
+
+.search {
+	width: 100%;
+	margin-bottom: 16px;
+}

@@ -8,10 +8,13 @@ interface Props {
 	onTitleChange(id: string, title: string): void;
 	onSubmitGroup(id: string, title: string): void;
 	onGroupFocus(): void;
-	onShortcutFocus(shortcutId: string | null): void;
 	onDragOver(id: string): void;
 	onDragLeave(): void;
 	dropTargetGroup: string | null;
+
+	/* transition props */
+	onShortcutFocus(shortcutId: string | null): void;
+	searchQuery: string;
 }
 
 /**
@@ -26,6 +29,7 @@ interface Props {
 
 export default function BentoGroupCard({
 	group,
+	searchQuery,
 	onTitleChange,
 	onSubmitGroup,
 	onGroupFocus,
@@ -83,6 +87,7 @@ export default function BentoGroupCard({
 				<ShortcutGrid
 					groupId={group.id}
 					shortcuts={group.shortcuts}
+					searchQuery={searchQuery}
 					onShortcutFocus={onShortcutFocus}
 				/>
 			</div>

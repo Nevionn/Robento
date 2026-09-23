@@ -23,6 +23,7 @@ import { useBentoShortcuts } from "../../hooks/useBentoShortcuts";
 import BentoGroupCard from "../BentoGroupCard/BentoGroupCard";
 import Hotkeys from "../Hotkeys/Hotkeys";
 import styles from "./BentoGrid.module.css";
+import BentoSearch from "./BentoSearch";
 import { generateLayout, updateLayoutHeight } from "./layout";
 
 export interface Shortcut {
@@ -73,6 +74,8 @@ export default function BentoGrid() {
 	const [dropTargetGroup, setDropTargetGroup] = useState<string | null>(null);
 	const [isDraggingShortcut, setIsDraggingShortcut] = useState(false);
 	const [isInitialLoading, setIsInitialLoading] = useState(true);
+
+	const [searchQuery, setSearchQuery] = useState("");
 
 	const dropTargetGroupRef = useRef<string | null>(null);
 	const [layout, setLayout] = useState<Layout>(generateLayout(initialGroups));
@@ -359,76 +362,83 @@ export default function BentoGrid() {
 			{!isInitialLoading && groups.length === 0 && <Hotkeys />}
 
 			{!isInitialLoading && groups.length > 0 && mounted && (
-				<DndContext
-					sensors={sensors}
-					collisionDetection={closestCenter}
-					onDragStart={() => setIsDraggingShortcut(true)}
-					onDragEnd={(event) => {
-						setIsDraggingShortcut(false);
-						handleShortcutDragEnd(event);
-					}}
-					onDragCancel={() => setIsDraggingShortcut(false)}
-				>
-					<ReactGridLayout
-						width={width}
-						layout={layout}
-						gridConfig={{
-							cols: 2,
-							rowHeight: 140,
-							margin: [16, 16],
-							containerPadding: [0, 0],
-						}}
-						dragConfig={{
-							enabled: !isDraggingShortcut,
-							cancel: ".shortcut-drag",
-						}}
-						resizeConfig={{
-							enabled: false,
-						}}
-						onLayoutChange={(next) => {
-							setLayout([...next]);
+				<>
+					<div className={styles.search}>
+						<BentoSearch value={searchQuery} onChange={setSearchQuery} />
+					</div>
 
-							const orderedGroupIds = [...next]
-								.sort((currentGroup, nextGroup) => {
-									if (currentGroup.y !== nextGroup.y) {
-										return currentGroup.y - nextGroup.y;
-									}
-
-									return currentGroup.x - nextGroup.x;
-								})
-								.map((groupLayout) => groupLayout.i);
-
-							void updateGroupsOrder(orderedGroupIds);
+					<DndContext
+						sensors={sensors}
+						collisionDetection={closestCenter}
+						onDragStart={() => setIsDraggingShortcut(true)}
+						onDragEnd={(event) => {
+							setIsDraggingShortcut(false);
+							handleShortcutDragEnd(event);
 						}}
+						onDragCancel={() => setIsDraggingShortcut(false)}
 					>
-						{groups.map((group) => (
-							<div key={group.id}>
-								<BentoGroupCard
-									group={group}
-									onTitleChange={handleGroupTitleChange}
-									onSubmitGroup={submitGroupTitle}
-									onGroupFocus={() => {
-										setFocusedGroupId(group.id);
-										setFocusedShortcutId(null);
-									}}
-									onShortcutFocus={(shortcutId) => {
-										setFocusedShortcutId(shortcutId);
-										setFocusedGroupId(group.id);
-									}}
-									onDragOver={(id) => {
-										dropTargetGroupRef.current = id;
-										setDropTargetGroup(id);
-									}}
-									onDragLeave={() => {
-										dropTargetGroupRef.current = null;
-										setDropTargetGroup(null);
-									}}
-									dropTargetGroup={dropTargetGroup}
-								/>
-							</div>
-						))}
-					</ReactGridLayout>
-				</DndContext>
+						<ReactGridLayout
+							width={width}
+							layout={layout}
+							gridConfig={{
+								cols: 2,
+								rowHeight: 140,
+								margin: [16, 16],
+								containerPadding: [0, 0],
+							}}
+							dragConfig={{
+								enabled: !isDraggingShortcut,
+								cancel: ".shortcut-drag",
+							}}
+							resizeConfig={{
+								enabled: false,
+							}}
+							onLayoutChange={(next) => {
+								setLayout([...next]);
+
+								const orderedGroupIds = [...next]
+									.sort((currentGroup, nextGroup) => {
+										if (currentGroup.y !== nextGroup.y) {
+											return currentGroup.y - nextGroup.y;
+										}
+
+										return currentGroup.x - nextGroup.x;
+									})
+									.map((groupLayout) => groupLayout.i);
+
+								void updateGroupsOrder(orderedGroupIds);
+							}}
+						>
+							{groups.map((group) => (
+								<div key={group.id}>
+									<BentoGroupCard
+										group={group}
+										searchQuery={searchQuery}
+										onTitleChange={handleGroupTitleChange}
+										onSubmitGroup={submitGroupTitle}
+										onGroupFocus={() => {
+											setFocusedGroupId(group.id);
+											setFocusedShortcutId(null);
+										}}
+										onShortcutFocus={(shortcutId) => {
+											setFocusedShortcutId(shortcutId);
+											setFocusedGroupId(group.id);
+										}}
+										onDragOver={(id) => {
+											dropTargetGroupRef.current = id;
+											setDropTargetGroup(id);
+										}}
+										onDragLeave={() => {
+											dropTargetGroupRef.current = null;
+											setDropTargetGroup(null);
+										}}
+										dropTargetGroup={dropTargetGroup}
+									/>
+								</div>
+							))}
+						</ReactGridLayout>
+					</DndContext>
+				</>
 			)}
 		</section>
 	);

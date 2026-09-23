@@ -9,6 +9,7 @@ interface Props {
 	name: string;
 	icon: string | null;
 	target: string;
+	searchQuery: string;
 
 	onShortcutFocus(shortcutId: string | null): void;
 }
@@ -18,6 +19,7 @@ interface Props {
  *
  * Поддерживает перенос между группами
  * через общий DndContext.
+ * Фильтрацию по поиску через проп searchQuery.
  */
 
 export default function SortableShortcut({
@@ -25,6 +27,7 @@ export default function SortableShortcut({
 	name,
 	icon,
 	target,
+	searchQuery,
 	onShortcutFocus,
 }: Props) {
 	const { setNodeRef, attributes, listeners, transform, isDragging } =
@@ -38,12 +41,22 @@ export default function SortableShortcut({
 		});
 	}
 
+	const normalizedQuery = searchQuery.trim().toLowerCase();
+
+	const isSearchActive = normalizedQuery.length > 0;
+	const isMatch = name.toLowerCase().includes(normalizedQuery);
+
 	return (
 		<button
 			ref={setNodeRef}
 			{...attributes}
 			{...listeners}
-			className={`${styles.shortcut} shortcut-drag`}
+			className={`
+            ${styles.shortcut}
+             shortcut-drag
+            ${isSearchActive && isMatch ? styles.match : ""}
+    		${isSearchActive && !isMatch ? styles.dimmed : ""}
+					 `}
 			style={{
 				transform: CSS.Transform.toString(transform),
 				transition: "none",
