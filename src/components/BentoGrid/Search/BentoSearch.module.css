@@ -1,8 +1,10 @@
 .search {
 	width: 100%;
+	max-width: 500px;
 	display: flex;
 	align-items: center;
 	box-sizing: border-box;
+	margin: 0 auto;
 }
 
 .input {

@@ -23,8 +23,8 @@ import { useBentoShortcuts } from "../../hooks/useBentoShortcuts";
 import BentoGroupCard from "../BentoGroupCard/BentoGroupCard";
 import Hotkeys from "../Hotkeys/Hotkeys";
 import styles from "./BentoGrid.module.css";
-import BentoSearch from "./BentoSearch";
 import { generateLayout, updateLayoutHeight } from "./layout";
+import BentoSearch from "./Search/BentoSearch";
 
 export interface Shortcut {
 	id: string;
