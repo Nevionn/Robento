@@ -1,13 +1,30 @@
 .wrapper {
 	width: 100%;
-	padding: 0;
+	height: 100dvh;
+	padding: 0 0 0;
 	box-sizing: border-box;
+	overflow-y: auto;
+	overflow-x: hidden;
 }
 
 .wrapper_withGroups {
 	width: 100%;
-	padding: 16px;
+	height: 100dvh;
+	padding: 16px 16px 100px;
 	box-sizing: border-box;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.wrapper,
+.wrapper_withGroups {
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+.wrapper::-webkit-scrollbar,
+.wrapper_withGroups::-webkit-scrollbar {
+	display: none;
 }
 
 .search {
