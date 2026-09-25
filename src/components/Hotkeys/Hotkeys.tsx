@@ -15,7 +15,7 @@ const hotkeys = [
 	},
 	{
 		description: "Открыть/свернуть окно",
-		keys: ["Alt", "B"],
+		keys: ["Alt", "Space"],
 	},
 ];
 

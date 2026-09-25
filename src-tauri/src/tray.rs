@@ -99,7 +99,7 @@ pub fn setup_tray(app: &mut tauri::App) -> tauri::Result<()> {
 
     app.global_shortcut()
         .on_shortcut(
-            "Alt+B",
+             "Alt + Space",
             move |app, _shortcut, event| {
                 if event.state != ShortcutState::Pressed {
                     return;
