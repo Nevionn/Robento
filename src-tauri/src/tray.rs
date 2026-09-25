@@ -3,6 +3,7 @@ use tauri::{
     tray::TrayIconBuilder,
     Manager,
     WindowEvent,
+    Emitter
 };
 
 use tauri_plugin_global_shortcut::{
@@ -85,6 +86,7 @@ pub fn setup_tray(app: &mut tauri::App) -> tauri::Result<()> {
                     {
                         let _ = window.show();
                         let _ = window.set_focus();
+                        let _ = app.emit("window-opened", ());
                     }
                 }
 
@@ -129,6 +131,7 @@ pub fn setup_tray(app: &mut tauri::App) -> tauri::Result<()> {
                         } else {
                             let _ = window.show();
                             let _ = window.set_focus();
+                            let _ = app.emit("window-opened", ());
                         }
                     }
                 }
