@@ -78,18 +78,12 @@ pub async fn create_shortcut(
 ) -> Result<ShortcutDto, String> {
     let timestamp = Timestamp::now(uuid::NoContext);
 
-    let id = Uuid::new_v6(
-        timestamp,
-        &[0, 0, 0, 0, 0, 0],
-    )
-    .to_string();
+    let id = Uuid::new_v6(timestamp, &[0, 0, 0, 0, 0, 0]).to_string();
 
-    let created_at: String = sqlx::query_scalar(
-        "SELECT datetime('now')"
-    )
-    .fetch_one(pool.inner())
-    .await
-    .map_err(|e| e.to_string())?;
+    let created_at: String = sqlx::query_scalar("SELECT datetime('now')")
+        .fetch_one(pool.inner())
+        .await
+        .map_err(|e| e.to_string())?;
 
     let sort_order: i64 = sqlx::query_scalar(
         r#"
@@ -143,9 +137,7 @@ pub async fn create_shortcut(
 }
 
 #[tauri::command]
-pub async fn get_shortcuts(
-    pool: tauri::State<'_, SqlitePool>,
-) -> Result<Vec<ShortcutDto>, String> {
+pub async fn get_shortcuts(pool: tauri::State<'_, SqlitePool>) -> Result<Vec<ShortcutDto>, String> {
     let rows = sqlx::query(
         r#"
         SELECT
@@ -185,10 +177,7 @@ pub async fn update_shortcuts_order(
     pool: tauri::State<'_, SqlitePool>,
     shortcuts: Vec<(String, String, i64)>,
 ) -> Result<(), String> {
-    let mut transaction = pool
-        .begin()
-        .await
-        .map_err(|e| e.to_string())?;
+    let mut transaction = pool.begin().await.map_err(|e| e.to_string())?;
 
     for (id, group_id, sort_order) in shortcuts {
         sqlx::query(
@@ -208,19 +197,13 @@ pub async fn update_shortcuts_order(
         .map_err(|e| e.to_string())?;
     }
 
-    transaction
-        .commit()
-        .await
-        .map_err(|e| e.to_string())?;
+    transaction.commit().await.map_err(|e| e.to_string())?;
 
     Ok(())
 }
 
 #[tauri::command]
-pub async fn delete_shortcut(
-    pool: tauri::State<'_, SqlitePool>,
-    id: String,
-) -> Result<(), String> {
+pub async fn delete_shortcut(pool: tauri::State<'_, SqlitePool>, id: String) -> Result<(), String> {
     sqlx::query(
         r#"
         DELETE FROM Shortcuts

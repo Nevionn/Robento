@@ -3,10 +3,7 @@ use serde::Serialize;
 use std::path::Path;
 use std::process::Command;
 
-use lnk::{
-    encoding::WINDOWS_1252,
-    ShellLink,
-};
+use lnk::{encoding::WINDOWS_1252, ShellLink};
 
 use tauri_plugin_dialog::DialogExt;
 use windows_icons::get_icon_base64_by_path;
@@ -39,9 +36,7 @@ fn shortcut_from_target(target: String, source: String) -> Shortcut {
 
     let icon = get_icon_base64_by_path(&target)
         .ok()
-        .map(|base64| {
-            format!("data:image/png;base64,{}", base64)
-        });
+        .map(|base64| format!("data:image/png;base64,{}", base64));
 
     Shortcut {
         id: target.clone(),
@@ -64,15 +59,9 @@ fn shortcut_from_target(target: String, source: String) -> Shortcut {
 
 #[tauri::command]
 pub fn parse_shortcut(path: String) -> Result<Shortcut, String> {
-    let shortcut = ShellLink::open(
-        &path,
-        WINDOWS_1252,
-    )
-    .map_err(|e| e.to_string())?;
+    let shortcut = ShellLink::open(&path, WINDOWS_1252).map_err(|e| e.to_string())?;
 
-    let target = shortcut
-        .link_target()
-        .unwrap_or_default();
+    let target = shortcut.link_target().unwrap_or_default();
 
     Ok(shortcut_from_target(target, path))
 }
@@ -96,18 +85,11 @@ pub fn pick_executable(app: tauri::AppHandle) -> Result<Option<Shortcut>, String
         return Ok(None);
     };
 
-    let path = file_path
-        .into_path()
-        .map_err(|e| e.to_string())?;
+    let path = file_path.into_path().map_err(|e| e.to_string())?;
 
-    let target = path
-        .to_string_lossy()
-        .to_string();
+    let target = path.to_string_lossy().to_string();
 
-    let shortcut = shortcut_from_target(
-        target.clone(),
-        target,
-    );
+    let shortcut = shortcut_from_target(target.clone(), target);
 
     Ok(Some(shortcut))
 }
@@ -120,9 +102,7 @@ pub fn pick_executable(app: tauri::AppHandle) -> Result<Option<Shortcut>, String
 
 #[tauri::command]
 pub fn launch_shortcut(target: String) -> Result<(), String> {
-    Command::new(&target)
-        .spawn()
-        .map_err(|e| e.to_string())?;
+    Command::new(&target).spawn().map_err(|e| e.to_string())?;
 
     Ok(())
 }

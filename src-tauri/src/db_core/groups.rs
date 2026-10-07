@@ -1,8 +1,8 @@
 use serde::Serialize;
 use sqlx::{Row, SqlitePool};
+use tauri::Emitter;
 use tauri::State;
 use uuid::{Timestamp, Uuid};
-use tauri::Emitter;
 
 const RESET_DB: bool = false;
 const PRINT_SCHEMA: bool = false;
@@ -65,25 +65,18 @@ pub async fn create_group(
 ) -> Result<GroupDto, String> {
     let timestamp = Timestamp::now(uuid::NoContext);
 
-    let id = Uuid::new_v6(
-        timestamp,
-        &[0, 0, 0, 0, 0, 0],
-    )
-    .to_string();
+    let id = Uuid::new_v6(timestamp, &[0, 0, 0, 0, 0, 0]).to_string();
 
-    let created_at: String = sqlx::query_scalar(
-        "SELECT datetime('now')"
-    )
-    .fetch_one(pool.inner())
-    .await
-    .map_err(|e| e.to_string())?;
+    let created_at: String = sqlx::query_scalar("SELECT datetime('now')")
+        .fetch_one(pool.inner())
+        .await
+        .map_err(|e| e.to_string())?;
 
-    let sort_order: i64 = sqlx::query_scalar(
-        "SELECT COALESCE(MAX(sort_order), -1) + 1 FROM Groups"
-    )
-    .fetch_one(pool.inner())
-    .await
-    .map_err(|e| e.to_string())?;
+    let sort_order: i64 =
+        sqlx::query_scalar("SELECT COALESCE(MAX(sort_order), -1) + 1 FROM Groups")
+            .fetch_one(pool.inner())
+            .await
+            .map_err(|e| e.to_string())?;
 
     sqlx::query(
         r#"
@@ -104,8 +97,7 @@ pub async fn create_group(
     .await
     .map_err(|e| e.to_string())?;
 
-    app.emit("group-created", ())
-        .map_err(|e| e.to_string())?;
+    app.emit("group-created", ()).map_err(|e| e.to_string())?;
 
     Ok(GroupDto {
         id,
@@ -116,9 +108,7 @@ pub async fn create_group(
 }
 
 #[tauri::command]
-pub async fn get_groups(
-    pool: State<'_, SqlitePool>,
-) -> Result<Vec<GroupDto>, String> {
+pub async fn get_groups(pool: State<'_, SqlitePool>) -> Result<Vec<GroupDto>, String> {
     let rows = sqlx::query(
         r#"
         SELECT id, title, sort_order, created_at
@@ -185,11 +175,7 @@ pub async fn update_groups_order(
     pool: State<'_, SqlitePool>,
     group_ids: Vec<String>,
 ) -> Result<(), String> {
-    let mut tx = pool
-        .inner()
-        .begin()
-        .await
-        .map_err(|e| e.to_string())?;
+    let mut tx = pool.inner().begin().await.map_err(|e| e.to_string())?;
 
     for (sort_order, id) in group_ids.iter().enumerate() {
         sqlx::query(
@@ -206,9 +192,7 @@ pub async fn update_groups_order(
         .map_err(|e| e.to_string())?;
     }
 
-    tx.commit()
-        .await
-        .map_err(|e| e.to_string())?;
+    tx.commit().await.map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -230,16 +214,13 @@ pub async fn delete_group(
     .await
     .map_err(|e| e.to_string())?;
 
-    app.emit("group-deleted", ())
-        .map_err(|e| e.to_string())?;
+    app.emit("group-deleted", ()).map_err(|e| e.to_string())?;
 
     Ok(())
 }
 
 #[tauri::command]
-pub async fn has_groups(
-    pool: State<'_, SqlitePool>,
-) -> Result<bool, String> {
+pub async fn has_groups(pool: State<'_, SqlitePool>) -> Result<bool, String> {
     let exists: bool = sqlx::query_scalar(
         r#"
         SELECT EXISTS(

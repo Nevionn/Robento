@@ -15,9 +15,7 @@ impl Default for AppSettings {
     }
 }
 
-pub fn is_hide_on_blur(
-    settings: &State<'_, AppSettings>,
-) -> bool {
+pub fn is_hide_on_blur(settings: &State<'_, AppSettings>) -> bool {
     settings
         .hide_on_blur
         .lock()
@@ -26,14 +24,8 @@ pub fn is_hide_on_blur(
 }
 
 #[tauri::command]
-pub fn set_hide_on_blur(
-    settings: State<'_, AppSettings>,
-    value: bool,
-) -> Result<(), String> {
-    let mut hide_on_blur = settings
-        .hide_on_blur
-        .lock()
-        .map_err(|e| e.to_string())?;
+pub fn set_hide_on_blur(settings: State<'_, AppSettings>, value: bool) -> Result<(), String> {
+    let mut hide_on_blur = settings.hide_on_blur.lock().map_err(|e| e.to_string())?;
 
     *hide_on_blur = value;
 
@@ -41,21 +33,13 @@ pub fn set_hide_on_blur(
 }
 
 #[tauri::command]
-pub fn get_hide_on_blur(
-    settings: State<'_, AppSettings>,
-) -> bool {
+pub fn get_hide_on_blur(settings: State<'_, AppSettings>) -> bool {
     is_hide_on_blur(&settings)
 }
 
 #[tauri::command]
-pub fn set_game_mode(
-    settings: State<'_, AppSettings>,
-    value: bool,
-) -> Result<(), String> {
-    let mut game_mode = settings
-        .game_mode
-        .lock()
-        .map_err(|e| e.to_string())?;
+pub fn set_game_mode(settings: State<'_, AppSettings>, value: bool) -> Result<(), String> {
+    let mut game_mode = settings.game_mode.lock().map_err(|e| e.to_string())?;
 
     *game_mode = value;
 

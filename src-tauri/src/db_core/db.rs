@@ -1,16 +1,11 @@
 use sqlx::{
-    sqlite::{
-        SqliteConnectOptions,
-        SqliteJournalMode,
-        SqlitePoolOptions,
-    },
+    sqlite::{SqliteConnectOptions, SqliteJournalMode, SqlitePoolOptions},
     SqlitePool,
 };
 
 use tauri::{AppHandle, Manager};
 
 pub async fn init_db(app: &AppHandle) -> SqlitePool {
-
     let db_path = app
         .path()
         .app_data_dir()
@@ -19,12 +14,8 @@ pub async fn init_db(app: &AppHandle) -> SqlitePool {
 
     println!("📂 Database path: {:?}", db_path);
 
-    std::fs::create_dir_all(
-        db_path
-            .parent()
-            .expect("Database directory not found"),
-    )
-    .expect("Failed to create database directory");
+    std::fs::create_dir_all(db_path.parent().expect("Database directory not found"))
+        .expect("Failed to create database directory");
 
     let options = SqliteConnectOptions::new()
         .filename(&db_path)
