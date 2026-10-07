@@ -51,6 +51,7 @@ pub fn setup_tray(app: &mut tauri::App) -> tauri::Result<()> {
             "show" => {
                 if let Some(window) = app.get_webview_window("main") {
                     let _ = window.show();
+                    let _ = window.set_always_on_top(true);
                     let _ = window.set_focus();
                     let _ = app.emit("window-opened", ());
                 }
@@ -88,6 +89,7 @@ pub fn setup_tray(app: &mut tauri::App) -> tauri::Result<()> {
                         let _ = window.hide();
                     } else {
                         let _ = window.show();
+                        let _ = window.set_always_on_top(true);
                         let _ = window.set_focus();
                         let _ = app.emit("window-opened", ());
                     }
