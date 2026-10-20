@@ -8,6 +8,11 @@ interface Props {
 	shortcuts: Shortcut[];
 }
 
+/**
+ * Сетка ярлыков.
+ * Отображение списка ярлыков группы.
+ */
+
 export default function ShortcutGrid({ groupId, shortcuts }: Props) {
 	return (
 		<SortableContext

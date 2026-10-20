@@ -12,6 +12,11 @@ interface Props {
 	target: string;
 }
 
+/**
+ * Компонент ярлыка.
+ * Отображение, перетаскивание и запуск программ.
+ */
+
 export default function SortableShortcut({
 	id,
 	groupId,

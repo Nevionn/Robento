@@ -39,6 +39,11 @@ interface GroupDto {
 	sort_order: number;
 }
 
+/**
+ * Сетка всех групп.
+ * Загрузка и изменение данных (группы, ярлыки), обработка перетаскивания групп (стратегия сортировки).
+ */
+
 export default function BentoGrid() {
 	const [groups, setGroups] = useState<BentoGroup[]>([]);
 	const [loading, setLoading] = useState(true);

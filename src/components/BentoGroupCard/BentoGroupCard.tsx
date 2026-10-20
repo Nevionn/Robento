@@ -9,6 +9,12 @@ interface Props {
 	group: BentoGroup;
 }
 
+/**
+ * Компонент отдельной группы.
+ * Визуальное перемещение гупп.
+ * @param {BentoGroup} props.group.
+ */
+
 export default function BentoGroupCard({ group }: Props) {
 	const {
 		setNodeRef,
