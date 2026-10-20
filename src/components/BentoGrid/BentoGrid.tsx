@@ -14,6 +14,8 @@ import {
 import { useEffect, useState } from "react";
 
 import { useBentoGroups } from "../../hooks/useBentoGroups";
+import { useBentoShortcuts } from "../../hooks/useBentoShortcuts";
+
 import BentoGroupCard from "../BentoGroupCard/BentoGroupCard";
 
 import styles from "./BentoGrid.module.css";
@@ -44,6 +46,7 @@ export default function BentoGrid() {
 	const [error, setError] = useState<string | null>(null);
 
 	const { loadGroups, updateGroupsOrder } = useBentoGroups({ setGroups });
+	const { loadShortcuts } = useBentoShortcuts({ setGroups });
 
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
@@ -57,10 +60,14 @@ export default function BentoGrid() {
 		async function start() {
 			try {
 				await loadGroups();
+
+				if (cancelled) return;
+
+				await loadShortcuts();
 			} catch (error) {
 				if (!cancelled) {
 					setError(String(error));
-					console.error("Failed to load groups:", error);
+					console.error("Failed to load groups and shortcuts:", error);
 				}
 			} finally {
 				if (!cancelled) {
@@ -74,7 +81,7 @@ export default function BentoGrid() {
 		return () => {
 			cancelled = true;
 		};
-	}, [loadGroups]);
+	}, [loadGroups, loadShortcuts]);
 
 	async function handleDragEnd({ active, over }: DragEndEvent) {
 		if (!over || active.id === over.id) return;
