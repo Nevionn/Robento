@@ -31,7 +31,13 @@ export default function SortableShortcut({
 		transform,
 		transition,
 		isDragging,
-	} = useSortable({ id });
+	} = useSortable({
+		id,
+		data: {
+			type: "shortcut",
+			groupId,
+		},
+	});
 
 	async function handleClick() {
 		await invoke("launch_shortcut", { target });

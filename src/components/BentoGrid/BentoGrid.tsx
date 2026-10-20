@@ -1,4 +1,5 @@
 import {
+	type CollisionDetection,
 	closestCenter,
 	DndContext,
 	type DragEndEvent,
@@ -114,13 +115,30 @@ export default function BentoGrid() {
 		);
 	}
 
+	const collisionDetection: CollisionDetection = (args) => {
+		const activeType = args.active.data.current?.type;
+
+		if (!activeType) {
+			return closestCenter(args);
+		}
+
+		const droppableContainers = args.droppableContainers.filter(
+			(container) => container.data.current?.type === activeType,
+		);
+
+		return closestCenter({
+			...args,
+			droppableContainers,
+		});
+	};
+
 	return (
 		<div
 			className={groups.length > 0 ? styles.wrapper_withGroups : styles.wrapper}
 		>
 			<DndContext
 				sensors={sensors}
-				collisionDetection={closestCenter}
+				collisionDetection={collisionDetection}
 				onDragEnd={handleDragEnd}
 			>
 				<SortableContext

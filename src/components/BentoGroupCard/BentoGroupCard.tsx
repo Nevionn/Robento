@@ -25,6 +25,7 @@ export default function BentoGroupCard({ group }: Props) {
 		listeners,
 	} = useSortable({
 		id: group.id,
+		data: { type: "group" },
 	});
 
 	return (

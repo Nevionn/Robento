@@ -1,56 +1,53 @@
 .name_shortcut {
-	letter-spacing: 1.4px;
-	color: var(--shortcut-text);
-	font-family: var(--font-general);
-	font-size: 13px;
-	font-weight: 600;
+    letter-spacing: 1.4px;
+    color: var(--shortcut-text);
+    font-family: var(--font-general);
+    font-size: 13px;
+    font-weight: 600;
 }
 
 .shortcut {
-	width: 100%;
-	min-height: 64px;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	gap: 6px;
+    width: 100%;
+    min-height: 64px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 
-	border: none;
-	border-radius: 14px;
-	background: var(--shortcut-background);
+    border: none;
+    border-radius: 14px;
+    background: var(--shortcut-background);
 
-	cursor: pointer;
-	transition:
-		background 200ms ease,
-		transform 200ms ease;
+    cursor: pointer;
 }
 
 .shortcut:hover {
-	background: var(--shortcut-hover-background);
-	color: var(--shortcut-hover-text);
-	transform: scale(1.03);
+    background: var(--shortcut-hover-background);
+    color: var(--shortcut-hover-text);
+    transform: scale(1.03);
 }
 
 .icon {
-	font-size: 26px;
-	line-height: 1;
+    font-size: 26px;
+    line-height: 1;
 }
 
 @media (max-width: 420px) {
-	.shortcuts {
-		grid-template-columns: 1fr;
-	}
+    .shortcuts {
+        grid-template-columns: 1fr;
+    }
 }
 
 .dimmed {
-	opacity: 0.25;
-	filter: grayscale(0.8);
+    opacity: 0.25;
+    filter: grayscale(0.8);
 }
 
 .match {
-	background: #3f6f52;
+    background: #3f6f52;
 }
 
 .match .name_shortcut {
-	color: #a6e3a1;
+    color: #a6e3a1;
 }
