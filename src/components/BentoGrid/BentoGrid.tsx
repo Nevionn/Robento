@@ -11,9 +11,9 @@ import {
 	rectSortingStrategy,
 	SortableContext,
 } from "@dnd-kit/sortable";
-import { invoke } from "@tauri-apps/api/core";
 import { useEffect, useState } from "react";
 
+import { useBentoGroups } from "../../hooks/useBentoGroups";
 import BentoGroupCard from "../BentoGroupCard/BentoGroupCard";
 
 import styles from "./BentoGrid.module.css";
@@ -23,7 +23,7 @@ export interface Shortcut {
 	name: string;
 	target: string;
 	source: string;
-	path2icon?: string;
+	reservePath2icon?: string;
 	icon: string | null;
 }
 
@@ -31,12 +31,6 @@ export interface BentoGroup {
 	id: string;
 	title: string;
 	shortcuts: Shortcut[];
-}
-
-interface GroupDto {
-	id: string;
-	title: string;
-	sort_order: number;
 }
 
 /**
@@ -49,6 +43,8 @@ export default function BentoGrid() {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
+	const { loadGroups, updateGroupsOrder } = useBentoGroups({ setGroups });
+
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
 			activationConstraint: { distance: 5 },
@@ -58,19 +54,9 @@ export default function BentoGrid() {
 	useEffect(() => {
 		let cancelled = false;
 
-		async function loadGroups() {
+		async function start() {
 			try {
-				const result = await invoke<GroupDto[]>("get_groups");
-
-				if (cancelled) return;
-
-				setGroups(
-					result.map((group) => ({
-						id: group.id,
-						title: group.title,
-						shortcuts: [],
-					})),
-				);
+				await loadGroups();
 			} catch (error) {
 				if (!cancelled) {
 					setError(String(error));
@@ -83,12 +69,12 @@ export default function BentoGrid() {
 			}
 		}
 
-		void loadGroups();
+		void start();
 
 		return () => {
 			cancelled = true;
 		};
-	}, []);
+	}, [loadGroups]);
 
 	async function handleDragEnd({ active, over }: DragEndEvent) {
 		if (!over || active.id === over.id) return;
@@ -106,9 +92,7 @@ export default function BentoGrid() {
 		setGroups(nextGroups);
 
 		try {
-			await invoke("update_groups_order", {
-				groupIds: nextGroups.map((group) => group.id),
-			});
+			await updateGroupsOrder(nextGroups.map((group) => group.id));
 		} catch (error) {
 			console.error("Failed to save group order:", error);
 			setGroups(previousGroups);
