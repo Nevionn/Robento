@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/correctness/useExhaustiveDependencies: <explanation> */
+/** biome-ignore-all lint/correctness/useExhaustiveDependencies: intentional */
 import type { DragEndEvent } from "@dnd-kit/core";
 import {
 	closestCenter,
