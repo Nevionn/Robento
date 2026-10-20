@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import type { Layout } from "react-grid-layout";
 import type { BentoGroup } from "../components/BentoGrid/BentoGrid";
 
-import { generateLayout } from "../components/BentoGrid/layout";
+// import { generateLayout } from "../components/BentoGrid/layout";
 
 interface UseBentoGroupsParams {
 	setGroups: React.Dispatch<React.SetStateAction<BentoGroup[]>>;
