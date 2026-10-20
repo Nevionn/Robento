@@ -37,7 +37,6 @@ interface GroupDto {
 	id: string;
 	title: string;
 	sort_order: number;
-	created_at: string;
 }
 
 export default function BentoGrid() {

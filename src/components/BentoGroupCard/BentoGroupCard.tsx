@@ -39,7 +39,7 @@ export default function BentoGroupCard({ group }: Props) {
 			</header>
 
 			<div className={styles.shortcuts}>
-				<ShortcutGrid shortcuts={group.shortcuts} />
+				<ShortcutGrid groupId={group.id} shortcuts={group.shortcuts} />
 			</div>
 		</div>
 	);

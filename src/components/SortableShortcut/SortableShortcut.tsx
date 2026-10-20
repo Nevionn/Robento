@@ -6,65 +6,43 @@ import styles from "./SortableShortcut.module.css";
 
 interface Props {
 	id: string;
+	groupId: string;
 	name: string;
 	icon: string | null;
 	target: string;
-	searchQuery: string;
-
-	onShortcutFocus(shortcutId: string | null): void;
 }
-
-/**
- * Отдельный перетаскиваемый ярлык.
- *
- * Поддерживает перенос между группами
- * через общий DndContext.
- * Фильтрацию по поиску через проп searchQuery.
- */
 
 export default function SortableShortcut({
 	id,
+	groupId,
 	name,
 	icon,
 	target,
-	searchQuery,
-	onShortcutFocus,
 }: Props) {
-	const { setNodeRef, attributes, listeners, transform, isDragging } =
-		useSortable({
-			id,
-		});
+	const {
+		setNodeRef,
+		attributes,
+		listeners,
+		transform,
+		transition,
+		isDragging,
+	} = useSortable({ id });
 
 	async function handleClick() {
-		await invoke("launch_shortcut", {
-			target,
-		});
+		await invoke("launch_shortcut", { target });
 	}
-
-	const normalizedQuery = searchQuery.trim().toLowerCase();
-
-	const isSearchActive = normalizedQuery.length > 0;
-	const isMatch = name.toLowerCase().includes(normalizedQuery);
 
 	return (
 		<button
 			ref={setNodeRef}
 			{...attributes}
 			{...listeners}
-			className={`
-            ${styles.shortcut}
-             shortcut-drag
-            ${isSearchActive && isMatch ? styles.match : ""}
-    		${isSearchActive && !isMatch ? styles.dimmed : ""}
-					 `}
+			className={`${styles.shortcut} shortcut-drag`}
 			style={{
 				transform: CSS.Transform.toString(transform),
-				transition: "none",
+				transition,
 				opacity: isDragging ? 0.5 : 1,
 				zIndex: isDragging ? 10 : undefined,
-			}}
-			onMouseEnter={() => {
-				onShortcutFocus(id);
 			}}
 			onClick={(event) => {
 				event.stopPropagation();
