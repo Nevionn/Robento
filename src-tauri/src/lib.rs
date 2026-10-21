@@ -7,8 +7,8 @@ mod tray;
 use db_core::db::init_db;
 
 use db_core::groups::{
-    create_group, delete_group, get_groups, has_groups, init_groups_table, update_group_title,
-    update_groups_order,
+    create_group, delete_all_groups, delete_group, get_groups, has_groups, init_groups_table,
+    update_group_title, update_groups_order,
 };
 
 use db_core::shortcuts::{
@@ -59,6 +59,7 @@ pub fn run() {
             update_group_title,
             update_groups_order,
             delete_group,
+            delete_all_groups,
             has_groups,
             get_hide_on_blur,
             set_hide_on_blur,

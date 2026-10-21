@@ -19,12 +19,14 @@ interface GroupDto {
  *
  * Отвечает за:
  * loadGroups: Загружает группы из БД.
+ * createGroup: Создает новую группу.
  * updateGroupsOrder: Сохраняет порядок групп в БД.
  * deleteGroup: Удаляет группу из БД и локального состояния.
+ * deleteAllGroups: Удаляет все группы и ярлыки из БД.
  * checkHasGroups: Проверяет, существуют ли группы в БД.
  */
 
-// TODO: Добавить методы для создания и редактирования группы, и удаление всех групп
+// TODO: Добавить метод для редактирования группы
 
 export function useBentoGroups({ setGroups }: UseBentoGroupsParams) {
 	const loadGroups = useCallback(async () => {
@@ -39,6 +41,26 @@ export function useBentoGroups({ setGroups }: UseBentoGroupsParams) {
 		setGroups(loadedGroups);
 	}, [setGroups]);
 
+	const createGroup = useCallback(
+		async (title: string) => {
+			const createdGroup = await invoke<GroupDto>("create_group", {
+				title,
+			});
+
+			setGroups((prev) => [
+				...prev,
+				{
+					id: createdGroup.id,
+					title: createdGroup.title,
+					shortcuts: [],
+				},
+			]);
+
+			return createdGroup;
+		},
+		[setGroups],
+	);
+
 	const updateGroupsOrder = useCallback(async (groupIds: string[]) => {
 		await invoke("update_groups_order", { groupIds });
 	}, []);
@@ -52,14 +74,22 @@ export function useBentoGroups({ setGroups }: UseBentoGroupsParams) {
 		[setGroups],
 	);
 
+	const deleteAllGroups = useCallback(async () => {
+		await invoke("delete_all_groups");
+
+		setGroups([]);
+	}, [setGroups]);
+
 	const checkHasGroups = useCallback(async () => {
 		return await invoke<boolean>("has_groups");
 	}, []);
 
 	return {
 		loadGroups,
+		createGroup,
 		updateGroupsOrder,
 		deleteGroup,
+		deleteAllGroups,
 		checkHasGroups,
 	};
 }
