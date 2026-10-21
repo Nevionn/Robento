@@ -13,18 +13,22 @@ interface SavedShortcut extends Shortcut {
 	created_at: string;
 }
 
+/**
+ * Операции с ярлыками.
+ *
+ * Отвечает за:
+ * createShortcut: Создаёт ярлык в БД и добавляет его в локальную группу.
+ * loadShortcuts: Загружает все ярлыки одним запросом и распределяет их по группам.
+ * updateShortcutsOrder: Сохраняет порядок ярлыков в БД.
+ * deleteShortcut: Удаляет ярлык из БД и локального состояния.
+ */
+
 export function useBentoShortcuts({ setGroups }: UseBentoShortcutsParams) {
-	/**
-	 * Создаёт ярлык в БД и добавляет его в локальную группу.
-	 */
 	const createShortcut = useCallback(
 		async (_groupId: string, _shortcut: Omit<Shortcut, "id">) => {},
 		[],
 	);
 
-	/**
-	 * Загружает все ярлыки одним запросом и распределяет их по группам.
-	 */
 	const loadShortcuts = useCallback(async () => {
 		const shortcuts = await invoke<SavedShortcut[]>("get_shortcuts");
 
@@ -46,9 +50,6 @@ export function useBentoShortcuts({ setGroups }: UseBentoShortcutsParams) {
 		);
 	}, [setGroups]);
 
-	/**
-	 * Сохраняет порядок ярлыков в БД.
-	 */
 	const updateShortcutsOrder = useCallback(
 		async (
 			shortcuts: {
@@ -73,9 +74,6 @@ export function useBentoShortcuts({ setGroups }: UseBentoShortcutsParams) {
 		[],
 	);
 
-	/**
-	 * Удаляет ярлык из БД и локального состояния.
-	 */
 	const deleteShortcut = useCallback(
 		async (id: string) => {
 			try {

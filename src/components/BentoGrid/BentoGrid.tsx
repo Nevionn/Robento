@@ -1,19 +1,13 @@
 import {
-	type CollisionDetection,
-	closestCenter,
 	DndContext,
-	type DragEndEvent,
 	PointerSensor,
 	useSensor,
 	useSensors,
 } from "@dnd-kit/core";
-import {
-	arrayMove,
-	rectSortingStrategy,
-	SortableContext,
-} from "@dnd-kit/sortable";
+import { rectSortingStrategy, SortableContext } from "@dnd-kit/sortable";
 import { useEffect, useState } from "react";
 
+import { useBentoDragAndDrop } from "../../hooks/useBentoDragAndDrop";
 import { useBentoGroups } from "../../hooks/useBentoGroups";
 import { useBentoShortcuts } from "../../hooks/useBentoShortcuts";
 
@@ -38,7 +32,8 @@ export interface BentoGroup {
 
 /**
  * Сетка всех групп.
- * Загрузка и изменение данных (группы, ярлыки), обработка перетаскивания групп (стратегия сортировки).
+ * Отвечает за загрузку данных (группы и ярлыки) и отображение групп.
+ * Логика drag-and-drop берется из useBentoDragAndDrop.
  */
 
 export default function BentoGrid() {
@@ -46,8 +41,13 @@ export default function BentoGrid() {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
-	const { loadGroups, updateGroupsOrder } = useBentoGroups({ setGroups });
+	const { loadGroups } = useBentoGroups({ setGroups });
 	const { loadShortcuts } = useBentoShortcuts({ setGroups });
+
+	const { handleDragEnd, collisionDetection } = useBentoDragAndDrop({
+		groups,
+		setGroups,
+	});
 
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
@@ -84,29 +84,6 @@ export default function BentoGrid() {
 		};
 	}, [loadGroups, loadShortcuts]);
 
-	async function handleDragEnd({ active, over }: DragEndEvent) {
-		if (!over || active.id === over.id) return;
-
-		const oldIndex = groups.findIndex(
-			(group) => group.id === String(active.id),
-		);
-		const newIndex = groups.findIndex((group) => group.id === String(over.id));
-
-		if (oldIndex < 0 || newIndex < 0) return;
-
-		const previousGroups = groups;
-		const nextGroups = arrayMove(groups, oldIndex, newIndex);
-
-		setGroups(nextGroups);
-
-		try {
-			await updateGroupsOrder(nextGroups.map((group) => group.id));
-		} catch (error) {
-			console.error("Failed to save group order:", error);
-			setGroups(previousGroups);
-		}
-	}
-
 	if (loading) return null;
 
 	if (error) {
@@ -114,23 +91,6 @@ export default function BentoGrid() {
 			<div className={styles.wrapper}>Не удалось загрузить группы: {error}</div>
 		);
 	}
-
-	const collisionDetection: CollisionDetection = (args) => {
-		const activeType = args.active.data.current?.type;
-
-		if (!activeType) {
-			return closestCenter(args);
-		}
-
-		const droppableContainers = args.droppableContainers.filter(
-			(container) => container.data.current?.type === activeType,
-		);
-
-		return closestCenter({
-			...args,
-			droppableContainers,
-		});
-	};
 
 	return (
 		<div
