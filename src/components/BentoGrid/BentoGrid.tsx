@@ -12,10 +12,12 @@ import { useBentoGroups } from "../../hooks/useBentoGroups";
 import { useBentoKeyboardShortcuts } from "../../hooks/useBentoKeyboardShortcuts";
 import { useBentoShortcuts } from "../../hooks/useBentoShortcuts";
 
+import { filterBentoGroups } from "../../utils/filterBentoGroups";
+
 import BentoGroupCard from "../BentoGroupCard/BentoGroupCard";
 import { CreateGroupModal } from "../modals/CreateGroupModal";
-
 import styles from "./BentoGrid.module.css";
+import BentoSearch from "./Search/BentoSearch";
 
 export interface Shortcut {
 	id: string;
@@ -48,6 +50,10 @@ export default function BentoGrid() {
 	const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 	const [modalMode, setModalMode] = useState<"create" | "edit">("create");
 	const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+
+	const [searchQuery, setSearchQuery] = useState("");
+	const filteredGroups = filterBentoGroups(groups, searchQuery);
+	const isSearchActive = searchQuery.trim().length > 0;
 
 	const { loadGroups, createGroup, updateGroupTitle } = useBentoGroups({
 		setGroups,
@@ -134,17 +140,25 @@ export default function BentoGrid() {
 		<div
 			className={groups.length > 0 ? styles.wrapper_withGroups : styles.wrapper}
 		>
+			<div className={styles.search}>
+				<BentoSearch value={searchQuery} onChange={setSearchQuery} />
+			</div>
+
 			<DndContext
 				sensors={sensors}
 				collisionDetection={collisionDetection}
-				onDragEnd={handleDragEnd}
+				onDragEnd={isSearchActive ? undefined : handleDragEnd}
 			>
 				<SortableContext
-					items={groups.map((group) => group.id)}
+					items={filteredGroups.map((group) => group.id)}
 					strategy={rectSortingStrategy}
 				>
+					{isSearchActive && filteredGroups.length > 0 && (
+						<p className={styles.helperSearch}>Перетаскивание отключено</p>
+					)}
+
 					<div className={styles.bentoGrid}>
-						{groups.map((group) => (
+						{filteredGroups.map((group) => (
 							<BentoGroupCard
 								key={group.id}
 								group={group}
@@ -153,6 +167,10 @@ export default function BentoGrid() {
 							/>
 						))}
 					</div>
+
+					{searchQuery.trim() !== "" && filteredGroups.length === 0 && (
+						<p className={styles.emptySearch}>Ничего не найдено</p>
+					)}
 				</SortableContext>
 			</DndContext>
 

@@ -39,3 +39,15 @@
     width: 100%;
     margin-bottom: 16px;
 }
+
+.helperSearch {
+    text-align: center;
+    color: var(--text-secondary, #888);
+    font-size: 18px;
+}
+
+.emptySearch {
+    text-align: center;
+    color: var(--text-secondary, #888);
+    font-size: 18px;
+}

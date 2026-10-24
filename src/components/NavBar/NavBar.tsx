@@ -23,7 +23,6 @@ export default function NavBar({ activeView, setActiveView }: NavBarProps) {
 
 	const { checkHasGroups } = useBentoGroups({
 		setGroups: () => {},
-		setLayout: () => {},
 	});
 
 	useEffect(() => {
