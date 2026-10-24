@@ -41,12 +41,17 @@ export interface BentoGroup {
 
 export default function BentoGrid() {
 	const [groups, setGroups] = useState<BentoGroup[]>([]);
+	const [focusedGroupId, setFocusedGroupId] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
 	const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+	const [modalMode, setModalMode] = useState<"create" | "edit">("create");
+	const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
 
-	const { loadGroups, createGroup } = useBentoGroups({ setGroups });
+	const { loadGroups, createGroup, updateGroupTitle } = useBentoGroups({
+		setGroups,
+	});
 	const { loadShortcuts } = useBentoShortcuts({ setGroups });
 
 	const { handleDragEnd, collisionDetection } = useBentoDragAndDrop({
@@ -55,19 +60,28 @@ export default function BentoGrid() {
 	});
 
 	const openCreateModal = useCallback(() => {
+		setModalMode("create");
+		setEditingGroupId(null);
+		setIsCreateModalOpen(true);
+	}, []);
+
+	const openEditModal = useCallback((id: string) => {
+		setModalMode("edit");
+		setEditingGroupId(id);
 		setIsCreateModalOpen(true);
 	}, []);
 
 	const closeCreateModal = useCallback(() => {
 		setIsCreateModalOpen(false);
+		setEditingGroupId(null);
 	}, []);
 
 	useBentoKeyboardShortcuts({
-		focusedGroupId: null,
+		focusedGroupId,
 		focusedShortcutId: null,
 
 		onCreateGroup: openCreateModal,
-		onEditGroup: () => {},
+		onEditGroup: openEditModal,
 		onDeleteGroup: () => {},
 		onDeleteShortcut: () => {},
 		onAddShortcut: () => {},
@@ -131,7 +145,12 @@ export default function BentoGrid() {
 				>
 					<div className={styles.bentoGrid}>
 						{groups.map((group) => (
-							<BentoGroupCard key={group.id} group={group} />
+							<BentoGroupCard
+								key={group.id}
+								group={group}
+								isSelected={focusedGroupId === group.id}
+								onSelect={setFocusedGroupId}
+							/>
 						))}
 					</div>
 				</SortableContext>
@@ -139,8 +158,17 @@ export default function BentoGrid() {
 
 			<CreateGroupModal
 				isOpen={isCreateModalOpen}
+				mode={modalMode}
+				groupToEdit={
+					groups.find((group) => group.id === editingGroupId) ?? null
+				}
 				onClose={closeCreateModal}
-				createGroup={createGroup}
+				createGroup={async (title) => {
+					await createGroup(title);
+				}}
+				updateGroupTitle={async (id, title) => {
+					await updateGroupTitle(id, title);
+				}}
 			/>
 		</div>
 	);

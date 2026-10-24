@@ -20,13 +20,12 @@ interface GroupDto {
  * Отвечает за:
  * loadGroups: Загружает группы из БД.
  * createGroup: Создает новую группу.
+ * updateGroupTitle: Обновляет название группы.
  * updateGroupsOrder: Сохраняет порядок групп в БД.
  * deleteGroup: Удаляет группу из БД и локального состояния.
  * deleteAllGroups: Удаляет все группы и ярлыки из БД.
  * checkHasGroups: Проверяет, существуют ли группы в БД.
  */
-
-// TODO: Добавить метод для редактирования группы
 
 export function useBentoGroups({ setGroups }: UseBentoGroupsParams) {
 	const loadGroups = useCallback(async () => {
@@ -61,6 +60,24 @@ export function useBentoGroups({ setGroups }: UseBentoGroupsParams) {
 		[setGroups],
 	);
 
+	const updateGroupTitle = useCallback(
+		async (id: string, title: string) => {
+			const updatedGroup = await invoke<GroupDto>("update_group_title", {
+				id,
+				title,
+			});
+
+			setGroups((prev) =>
+				prev.map((group) =>
+					group.id === id ? { ...group, title: updatedGroup.title } : group,
+				),
+			);
+
+			return updatedGroup;
+		},
+		[setGroups],
+	);
+
 	const updateGroupsOrder = useCallback(async (groupIds: string[]) => {
 		await invoke("update_groups_order", { groupIds });
 	}, []);
@@ -87,6 +104,7 @@ export function useBentoGroups({ setGroups }: UseBentoGroupsParams) {
 	return {
 		loadGroups,
 		createGroup,
+		updateGroupTitle,
 		updateGroupsOrder,
 		deleteGroup,
 		deleteAllGroups,

@@ -7,6 +7,8 @@ import styles from "./BentoGroupCard.module.css";
 
 interface Props {
 	group: BentoGroup;
+	isSelected: boolean;
+	onSelect: (id: string) => void;
 }
 
 /**
@@ -15,7 +17,7 @@ interface Props {
  * @param {BentoGroup} props.group.
  */
 
-export default function BentoGroupCard({ group }: Props) {
+export default function BentoGroupCard({ group, isSelected, onSelect }: Props) {
 	const {
 		setNodeRef,
 		transform,
@@ -31,7 +33,7 @@ export default function BentoGroupCard({ group }: Props) {
 	return (
 		<div
 			ref={setNodeRef}
-			className={styles.card}
+			className={`${styles.card} ${isSelected ? styles.selected : ""}`}
 			style={{
 				transform: CSS.Transform.toString(transform),
 				transition,
@@ -40,6 +42,7 @@ export default function BentoGroupCard({ group }: Props) {
 			}}
 			{...attributes}
 			{...listeners}
+			onClick={() => onSelect(group.id)}
 		>
 			<header className={styles.header}>
 				<h2>{group.title}</h2>

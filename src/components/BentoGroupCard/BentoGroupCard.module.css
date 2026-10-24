@@ -47,3 +47,7 @@
     flex: 1;
     min-height: 0;
 }
+
+.selected {
+    outline: 2px solid var(--text-secondary);
+}

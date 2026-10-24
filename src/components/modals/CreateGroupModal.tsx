@@ -1,23 +1,50 @@
-import { type SubmitEvent, useState } from "react";
+// biome-ignore-all lint/correctness/useExhaustiveDependencies: намеренное управление зависимостями useEffect
+import { type SubmitEvent, useEffect, useState } from "react";
 
+import type { BentoGroup } from "../BentoGrid/BentoGrid";
 import styles from "./CreateGroupModal.module.css";
+
+type ModalMode = "create" | "edit";
 
 interface CreateGroupModalProps {
 	isOpen: boolean;
+	mode: ModalMode;
+	groupToEdit: BentoGroup | null;
 	onClose: () => void;
-	createGroup: (title: string) => Promise<unknown>;
+	createGroup: (title: string) => Promise<void>;
+	updateGroupTitle: (id: string, title: string) => Promise<void>;
 }
+
+/**
+ * Модальное окно для создания группы или редактирования её названия.
+ *
+ * Инициализирует поле ввода при открытии, проверяет название,
+ * выполняет соответствующую операцию и отображает ошибки.
+ * Блокирует закрытие окна во время сохранения.
+ */
 
 export function CreateGroupModal({
 	isOpen,
+	mode,
+	groupToEdit,
 	onClose,
 	createGroup,
+	updateGroupTitle,
 }: CreateGroupModalProps) {
 	const [title, setTitle] = useState("");
 	const [error, setError] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
+	useEffect(() => {
+		if (!isOpen) return;
+
+		setTitle(mode === "edit" ? (groupToEdit?.title ?? "") : "");
+		setError("");
+	}, [isOpen, mode, groupToEdit?.id]);
+
 	if (!isOpen) return null;
+
+	const isEditMode = mode === "edit";
 
 	const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -29,16 +56,30 @@ export function CreateGroupModal({
 			return;
 		}
 
+		if (isEditMode && !groupToEdit) {
+			setError("Группа не найдена");
+			return;
+		}
+
 		setIsSubmitting(true);
 		setError("");
 
 		try {
-			await createGroup(trimmedTitle);
+			if (isEditMode && groupToEdit) {
+				await updateGroupTitle(groupToEdit.id, trimmedTitle);
+			} else {
+				await createGroup(trimmedTitle);
+			}
+
 			setTitle("");
 			onClose();
 		} catch (error) {
-			console.error("Failed to create group:", error);
-			setError("Не удалось создать группу");
+			console.error("Failed to save group:", error);
+			setError(
+				isEditMode
+					? "Не удалось изменить название группы"
+					: "Не удалось создать группу",
+			);
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -61,7 +102,7 @@ export function CreateGroupModal({
 				aria-labelledby="create-group-title"
 			>
 				<h2 id="create-group-title" className={styles.title}>
-					Создание группы
+					{isEditMode ? "Редактирование группы" : "Создание группы"}
 				</h2>
 
 				<form onSubmit={handleSubmit}>
@@ -96,7 +137,11 @@ export function CreateGroupModal({
 							type="submit"
 							disabled={isSubmitting}
 						>
-							{isSubmitting ? "Создание..." : "Создать"}
+							{isSubmitting
+								? "Сохранение..."
+								: isEditMode
+									? "Сохранить"
+									: "Создать"}
 						</button>
 
 						<button
