@@ -1,88 +1,91 @@
 html {
-	margin: 0;
-	padding: 0;
-	width: 100%;
-	height: 100%;
-	background: transparent;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
 }
 
 body {
-	margin: 0;
-	padding: 0;
-	width: 100%;
-	height: 100%;
-	background: transparent;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
 
-	font-family: var(--font-general);
-	scroll-behavior: smooth;
-	scrollbar-color: var(--color-scroll-bar);
+    font-family: var(--font-general);
+    scroll-behavior: smooth;
+    scrollbar-color: var(--color-scroll-bar);
 
-	border-radius: 12px;
-	overflow: hidden;
+    border-radius: 12px;
+    overflow: hidden;
 }
 
 body::before {
-	content: "";
-	position: fixed;
-	inset: 0;
+    content: "";
+    position: fixed;
+    inset: 0;
 
-	background: #1e1e2e;
-	border: 2px solid rgba(108, 112, 134, 0.45);
-	border-radius: 12px;
-	box-shadow: inset 0 0 20px rgba(17, 17, 27, 0.35);
+    background: #1e1e2e;
+    border: 2px solid rgba(108, 112, 134, 0.45);
+    border-radius: 12px;
+    box-shadow: inset 0 0 20px rgba(17, 17, 27, 0.35);
 
-	box-sizing: border-box;
-	pointer-events: none;
+    box-sizing: border-box;
+    pointer-events: none;
 
-	z-index: -1;
+    z-index: -1;
 }
 
 .container {
-	width: 100%;
-	height: 100%;
+    width: 100%;
+    height: 100%;
 }
 
 @font-face {
-	font-family: "Russo One";
-	src: url("/src/assets/fonts/RussoOne-Regular.ttf") format("truetype");
-	font-weight: 400;
-	font-style: normal;
+    font-family: "Russo One";
+    src: url("/src/assets/fonts/RussoOne-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
 }
 
 @font-face {
-	font-family: "Impact Regular";
-	src: url("/src/assets/fonts/Impact Regular.ttf") format("truetype");
-	font-weight: 400;
-	font-style: normal;
+    font-family: "Impact Regular";
+    src: url("/src/assets/fonts/Impact Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
 }
 
 @font-face {
-	font-family: "WDXL Lubrifont TC";
-	src: url("/src/assets/fonts/WDXLLubrifontTC-Regular.ttf") format("truetype");
-	font-weight: 400;
-	font-style: normal;
+    font-family: "WDXL Lubrifont TC";
+    src: url("/src/assets/fonts/WDXLLubrifontTC-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
 }
 
 :root {
-	/* Шрифты */
-	--font-general: "Russo One", sans-serif;
-	--font-description: "WDXL Lubrifont TC", sans-serif;
-	--font-title: "Impact Regular", sans-serif;
+    /* Шрифты */
+    --font-general: "Russo One", sans-serif;
+    --font-description: "WDXL Lubrifont TC", sans-serif;
+    --font-title: "Impact Regular", sans-serif;
 
-	/* Цвета */
-	--text-primary: #cdd6f4;
-	--text-secondary: rgb(138, 144, 211);
-	--text-muted: #a6adc8;
+    /* Цвета */
+    --text-primary: #cdd6f4;
+    --text-secondary: rgb(138, 144, 211);
+    --text-muted: #a6adc8;
 
-	--card-group-background: #313244;
-	--card-group-border: rgba(108, 112, 134, 0.35);
-	--card-group-hover-border: rgba(205, 214, 244, 0.35);
-	--card-group-title: #cdd6f4;
+    --card-group-background: #313244;
+    --card-group-border: rgba(108, 112, 134, 0.35);
+    --card-group-hover-border: rgba(205, 214, 244, 0.35);
+    --card-group-title: #cdd6f4;
 
-	--shortcut-background: #45475a;
-	--shortcut-text: #bac2de;
-	--shortcut-hover-background: #585b70;
-	--shortcut-hover-text: #cdd6f4;
+    --shortcut-background: #45475a;
+    --shortcut-text: #bac2de;
+    --shortcut-hover-background: #585b70;
+    --shortcut-hover-text: #cdd6f4;
 
-	--color-scroll-bar: #313244 #1e1e2e;
+    --focus-indicator-unfocused: #335430;
+    --focus-indicator-focused: #a6e3a1;
+
+    --color-scroll-bar: #313244 #1e1e2e;
 }
