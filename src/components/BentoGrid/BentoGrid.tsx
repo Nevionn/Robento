@@ -55,9 +55,10 @@ export default function BentoGrid() {
 	const filteredGroups = filterBentoGroups(groups, searchQuery);
 	const isSearchActive = searchQuery.trim().length > 0;
 
-	const { loadGroups, createGroup, updateGroupTitle } = useBentoGroups({
-		setGroups,
-	});
+	const { loadGroups, createGroup, updateGroupTitle, deleteGroup } =
+		useBentoGroups({
+			setGroups,
+		});
 	const { loadShortcuts } = useBentoShortcuts({ setGroups });
 
 	const { handleDragEnd, collisionDetection } = useBentoDragAndDrop({
@@ -82,13 +83,26 @@ export default function BentoGrid() {
 		setEditingGroupId(null);
 	}, []);
 
+	const handleDeleteGroup = useCallback(
+		async (id: string) => {
+			try {
+				await deleteGroup(id);
+
+				setFocusedGroupId((currentId) => (currentId === id ? null : currentId));
+			} catch (error) {
+				console.error("Failed to delete group:", error);
+			}
+		},
+		[deleteGroup],
+	);
+
 	useBentoKeyboardShortcuts({
 		focusedGroupId,
 		focusedShortcutId: null,
 
 		onCreateGroup: openCreateModal,
 		onEditGroup: openEditModal,
-		onDeleteGroup: () => {},
+		onDeleteGroup: handleDeleteGroup,
 		onDeleteShortcut: () => {},
 		onAddShortcut: () => {},
 	});
