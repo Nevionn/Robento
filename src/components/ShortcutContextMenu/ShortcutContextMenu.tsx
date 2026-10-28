@@ -7,6 +7,8 @@ interface Props {
 	x: number;
 	y: number;
 	onClose: () => void;
+	onLaunch: () => Promise<void>;
+	onDelete: () => Promise<void>;
 }
 
 /**
@@ -16,7 +18,13 @@ interface Props {
  * Закрывается при клике вне меню или нажатии Escape.
  */
 
-export default function ShortcutContextMenu({ x, y, onClose }: Props) {
+export default function ShortcutContextMenu({
+	x,
+	y,
+	onClose,
+	onLaunch,
+	onDelete,
+}: Props) {
 	const menuRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -57,7 +65,7 @@ export default function ShortcutContextMenu({ x, y, onClose }: Props) {
 				className={styles.menuItem}
 				type="button"
 				role="menuitem"
-				onClick={onClose}
+				onClick={() => void onLaunch()}
 			>
 				Запустить
 			</button>
@@ -75,7 +83,7 @@ export default function ShortcutContextMenu({ x, y, onClose }: Props) {
 				className={`${styles.menuItem} ${styles.delete}`}
 				type="button"
 				role="menuitem"
-				onClick={onClose}
+				onClick={() => void onDelete()}
 			>
 				Удалить
 			</button>

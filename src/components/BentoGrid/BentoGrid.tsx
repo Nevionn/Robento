@@ -59,7 +59,7 @@ export default function BentoGrid() {
 		useBentoGroups({
 			setGroups,
 		});
-	const { loadShortcuts } = useBentoShortcuts({ setGroups });
+	const { loadShortcuts, deleteShortcut } = useBentoShortcuts({ setGroups });
 
 	const { handleDragEnd, collisionDetection } = useBentoDragAndDrop({
 		groups,
@@ -178,6 +178,7 @@ export default function BentoGrid() {
 								group={group}
 								isSelected={focusedGroupId === group.id}
 								onSelect={setFocusedGroupId}
+								onDeleteShortcut={deleteShortcut}
 							/>
 						))}
 					</div>

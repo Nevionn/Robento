@@ -9,6 +9,7 @@ interface Props {
 	group: BentoGroup;
 	isSelected: boolean;
 	onSelect: (id: string) => void;
+	onDeleteShortcut: (id: string) => Promise<void>;
 }
 
 /**
@@ -17,7 +18,12 @@ interface Props {
  * @param {BentoGroup} props.group.
  */
 
-export default function BentoGroupCard({ group, isSelected, onSelect }: Props) {
+export default function BentoGroupCard({
+	group,
+	isSelected,
+	onSelect,
+	onDeleteShortcut,
+}: Props) {
 	const {
 		setNodeRef,
 		transform,
@@ -49,7 +55,11 @@ export default function BentoGroupCard({ group, isSelected, onSelect }: Props) {
 			</header>
 
 			<div className={styles.shortcuts}>
-				<ShortcutGrid groupId={group.id} shortcuts={group.shortcuts} />
+				<ShortcutGrid
+					groupId={group.id}
+					shortcuts={group.shortcuts}
+					onDeleteShortcut={onDeleteShortcut}
+				/>
 			</div>
 		</div>
 	);

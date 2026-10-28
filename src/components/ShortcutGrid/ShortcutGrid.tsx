@@ -6,6 +6,7 @@ import SortableShortcut from "../SortableShortcut/SortableShortcut";
 interface Props {
 	groupId: string;
 	shortcuts: Shortcut[];
+	onDeleteShortcut: (id: string) => Promise<void>;
 }
 
 /**
@@ -13,7 +14,11 @@ interface Props {
  * Отображение списка ярлыков группы.
  */
 
-export default function ShortcutGrid({ groupId, shortcuts }: Props) {
+export default function ShortcutGrid({
+	groupId,
+	shortcuts,
+	onDeleteShortcut,
+}: Props) {
 	return (
 		<SortableContext
 			items={shortcuts.map((shortcut) => shortcut.id)}
@@ -27,6 +32,7 @@ export default function ShortcutGrid({ groupId, shortcuts }: Props) {
 					name={shortcut.name}
 					icon={shortcut.icon}
 					target={shortcut.target}
+					onDelete={onDeleteShortcut}
 				/>
 			))}
 		</SortableContext>
