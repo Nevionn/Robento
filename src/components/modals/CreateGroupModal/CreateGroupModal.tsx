@@ -1,7 +1,7 @@
 // biome-ignore-all lint/correctness/useExhaustiveDependencies: намеренное управление зависимостями useEffect
 import { type SubmitEvent, useEffect, useState } from "react";
 
-import type { BentoGroup } from "../BentoGrid/BentoGrid";
+import type { BentoGroup } from "../../BentoGrid/BentoGrid";
 import styles from "./CreateGroupModal.module.css";
 
 type ModalMode = "create" | "edit";

@@ -15,7 +15,7 @@ import { useBentoShortcuts } from "../../hooks/useBentoShortcuts";
 import { filterBentoGroups } from "../../utils/filterBentoGroups";
 
 import BentoGroupCard from "../BentoGroupCard/BentoGroupCard";
-import { CreateGroupModal } from "../modals/CreateGroupModal";
+import { CreateGroupModal } from "../modals/CreateGroupModal/CreateGroupModal";
 import { CreateShortcutModal } from "../modals/CreateShortcutModal/CreateShortcutModal";
 import styles from "./BentoGrid.module.css";
 import BentoSearch from "./Search/BentoSearch";
