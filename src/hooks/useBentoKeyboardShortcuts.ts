@@ -7,7 +7,6 @@ interface UseBentoKeyboardShortcutsParams {
 	onCreateGroup(): void;
 	onEditGroup(id: string): void;
 	onDeleteGroup(id: string): void;
-	onDeleteShortcut(id: string): void;
 	onAddShortcut(): void;
 }
 
@@ -16,7 +15,7 @@ interface UseBentoKeyboardShortcutsParams {
  *
  * Shift + G — создать новую группу.
  * R        — редактировать выбранную группу.
- * Shift + R — удалить выбранную группу / ярлык.
+ * Shift + R — удалить выбранную группу.
  * Shift + F — создать ярлык в активной группе.
  *
  * Хук не управляет состоянием групп.
@@ -29,7 +28,6 @@ export function useBentoKeyboardShortcuts({
 	onCreateGroup,
 	onEditGroup,
 	onDeleteGroup,
-	onDeleteShortcut,
 	onAddShortcut,
 }: UseBentoKeyboardShortcutsParams) {
 	useEffect(() => {
@@ -57,11 +55,6 @@ export function useBentoKeyboardShortcuts({
 			// Shift + R — удалить выбранный объект
 			if (event.shiftKey && event.key.toLowerCase() === "r") {
 				event.preventDefault();
-
-				if (focusedShortcutId) {
-					onDeleteShortcut(focusedShortcutId);
-					return;
-				}
 
 				if (focusedGroupId) {
 					onDeleteGroup(focusedGroupId);
@@ -103,7 +96,6 @@ export function useBentoKeyboardShortcuts({
 		onCreateGroup,
 		onEditGroup,
 		onDeleteGroup,
-		onDeleteShortcut,
 		onAddShortcut,
 	]);
 }

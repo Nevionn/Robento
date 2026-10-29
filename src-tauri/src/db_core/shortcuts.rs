@@ -26,6 +26,7 @@ pub async fn init_shortcuts_table(pool: &SqlitePool) {
             target TEXT NOT NULL,
             source TEXT NOT NULL,
             icon TEXT,
+            reserve_path2icon TEXT,
             sort_order INTEGER NOT NULL DEFAULT 0,
             created_at TEXT NOT NULL,
 
@@ -63,6 +64,7 @@ pub struct ShortcutDto {
     pub target: String,
     pub source: String,
     pub icon: Option<String>,
+    pub reserve_path2icon: Option<String>,
     pub sort_order: i64,
     pub created_at: String,
 }
@@ -75,6 +77,7 @@ pub async fn create_shortcut(
     target: String,
     source: String,
     icon: Option<String>,
+    reserve_path2icon: Option<String>,
 ) -> Result<ShortcutDto, String> {
     let timestamp = Timestamp::now(uuid::NoContext);
 
@@ -106,10 +109,11 @@ pub async fn create_shortcut(
             target,
             source,
             icon,
+            reserve_path2icon,
             sort_order,
             created_at
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         "#,
     )
     .bind(&id)
@@ -118,6 +122,7 @@ pub async fn create_shortcut(
     .bind(&target)
     .bind(&source)
     .bind(&icon)
+    .bind(&reserve_path2icon)
     .bind(sort_order)
     .bind(&created_at)
     .execute(pool.inner())
@@ -131,6 +136,7 @@ pub async fn create_shortcut(
         target,
         source,
         icon,
+        reserve_path2icon,
         sort_order,
         created_at,
     })
@@ -147,6 +153,7 @@ pub async fn get_shortcuts(pool: tauri::State<'_, SqlitePool>) -> Result<Vec<Sho
             target,
             source,
             icon,
+            reserve_path2icon,
             sort_order,
             created_at
         FROM Shortcuts
@@ -166,6 +173,7 @@ pub async fn get_shortcuts(pool: tauri::State<'_, SqlitePool>) -> Result<Vec<Sho
             target: row.get("target"),
             source: row.get("source"),
             icon: row.get("icon"),
+            reserve_path2icon: row.get("reserve_path2icon"),
             sort_order: row.get("sort_order"),
             created_at: row.get("created_at"),
         })

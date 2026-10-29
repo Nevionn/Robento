@@ -16,6 +16,7 @@ import { filterBentoGroups } from "../../utils/filterBentoGroups";
 
 import BentoGroupCard from "../BentoGroupCard/BentoGroupCard";
 import { CreateGroupModal } from "../modals/CreateGroupModal";
+import { CreateShortcutModal } from "../modals/CreateShortcutModal/CreateShortcutModal";
 import styles from "./BentoGrid.module.css";
 import BentoSearch from "./Search/BentoSearch";
 
@@ -24,7 +25,7 @@ export interface Shortcut {
 	name: string;
 	target: string;
 	source: string;
-	reservePath2icon?: string;
+	reserve_path2icon?: string;
 	icon: string | null;
 }
 
@@ -51,6 +52,9 @@ export default function BentoGrid() {
 	const [modalMode, setModalMode] = useState<"create" | "edit">("create");
 	const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
 
+	const [isCreateShortcutModalOpen, setIsCreateShortcutModalOpen] =
+		useState(false);
+
 	const [searchQuery, setSearchQuery] = useState("");
 	const filteredGroups = filterBentoGroups(groups, searchQuery);
 	const isSearchActive = searchQuery.trim().length > 0;
@@ -59,7 +63,9 @@ export default function BentoGrid() {
 		useBentoGroups({
 			setGroups,
 		});
-	const { loadShortcuts, deleteShortcut } = useBentoShortcuts({ setGroups });
+	const { loadShortcuts, createShortcut, deleteShortcut } = useBentoShortcuts({
+		setGroups,
+	});
 
 	const { handleDragEnd, collisionDetection } = useBentoDragAndDrop({
 		groups,
@@ -83,6 +89,12 @@ export default function BentoGrid() {
 		setEditingGroupId(null);
 	}, []);
 
+	const openCreateShortcutModal = useCallback(() => {
+		if (!focusedGroupId) return;
+
+		setIsCreateShortcutModalOpen(true);
+	}, [focusedGroupId]);
+
 	const handleDeleteGroup = useCallback(
 		async (id: string) => {
 			try {
@@ -103,8 +115,7 @@ export default function BentoGrid() {
 		onCreateGroup: openCreateModal,
 		onEditGroup: openEditModal,
 		onDeleteGroup: handleDeleteGroup,
-		onDeleteShortcut: () => {},
-		onAddShortcut: () => {},
+		onAddShortcut: openCreateShortcutModal,
 	});
 
 	const sensors = useSensors(
@@ -201,6 +212,24 @@ export default function BentoGrid() {
 				}}
 				updateGroupTitle={async (id, title) => {
 					await updateGroupTitle(id, title);
+				}}
+			/>
+
+			<CreateShortcutModal
+				isOpen={isCreateShortcutModalOpen}
+				onClose={() => setIsCreateShortcutModalOpen(false)}
+				onSave={async (data) => {
+					if (!focusedGroupId) {
+						throw new Error("Сначала выберите группу");
+					}
+
+					await createShortcut(focusedGroupId, {
+						name: data.name || data.target.split(/[\\/]/).pop() || data.target,
+						target: data.target,
+						source: data.source,
+						icon: data.icon,
+						reserve_path2icon: data.reserve_path2icon || undefined,
+					});
 				}}
 			/>
 		</div>

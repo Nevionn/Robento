@@ -27,16 +27,24 @@ pub struct Shortcut {
  * - формирование структуры Shortcut.
  */
 
-fn shortcut_from_target(target: String, source: String) -> Shortcut {
+fn shortcut_from_target(
+    target: String,
+    source: String,
+    reserve_path2icon: Option<String>,
+) -> Shortcut {
     let name = Path::new(&target)
         .file_stem()
         .unwrap_or_default()
         .to_string_lossy()
         .to_string();
 
-    let icon = get_icon_base64_by_path(&target)
-        .ok()
-        .map(|base64| format!("data:image/png;base64,{}", base64));
+    let icon = match get_icon_base64_by_path(&target) {
+        Ok(base64) => Some(base64),
+        Err(_) => reserve_path2icon
+            .as_deref()
+            .and_then(|path| get_icon_base64_by_path(path).ok()),
+    }
+    .map(|base64| format!("data:image/png;base64,{base64}"));
 
     Shortcut {
         id: target.clone(),
@@ -63,7 +71,7 @@ pub fn parse_shortcut(path: String) -> Result<Shortcut, String> {
 
     let target = shortcut.link_target().unwrap_or_default();
 
-    Ok(shortcut_from_target(target, path))
+    Ok(shortcut_from_target(target, path, None))
 }
 
 /**
@@ -89,7 +97,7 @@ pub fn pick_executable(app: tauri::AppHandle) -> Result<Option<Shortcut>, String
 
     let target = path.to_string_lossy().to_string();
 
-    let shortcut = shortcut_from_target(target.clone(), target);
+    let shortcut = shortcut_from_target(target.clone(), target, None);
 
     Ok(Some(shortcut))
 }

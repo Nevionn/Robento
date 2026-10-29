@@ -7,10 +7,15 @@ interface UseBentoShortcutsParams {
 	setGroups: React.Dispatch<React.SetStateAction<BentoGroup[]>>;
 }
 
-interface SavedShortcut extends Shortcut {
+interface SavedShortcut {
+	id: string;
 	group_id: string;
+	name: string;
+	target: string;
+	source: string;
+	icon: string | null;
+	reserve_path2icon: string | null;
 	sort_order: number;
-	created_at: string;
 }
 
 /**
@@ -25,8 +30,43 @@ interface SavedShortcut extends Shortcut {
 
 export function useBentoShortcuts({ setGroups }: UseBentoShortcutsParams) {
 	const createShortcut = useCallback(
-		async (_groupId: string, _shortcut: Omit<Shortcut, "id">) => {},
-		[],
+		async (groupId: string, shortcut: Omit<Shortcut, "id">) => {
+			try {
+				const saved = await invoke<SavedShortcut>("create_shortcut", {
+					groupId,
+					name: shortcut.name,
+					target: shortcut.target,
+					source: shortcut.source,
+					icon: shortcut.icon,
+					reserve_path2icon: shortcut.reserve_path2icon ?? null,
+				});
+
+				setGroups((prev) =>
+					prev.map((group) =>
+						group.id === groupId
+							? {
+									...group,
+									shortcuts: [
+										...group.shortcuts,
+										{
+											id: saved.id,
+											name: saved.name,
+											target: saved.target,
+											source: saved.source,
+											icon: saved.icon,
+											reserve_path2icon: saved.reserve_path2icon ?? undefined,
+										},
+									],
+								}
+							: group,
+					),
+				);
+			} catch (error) {
+				console.error("Не удалось создать ярлык:", error);
+				throw error;
+			}
+		},
+		[setGroups],
 	);
 
 	const loadShortcuts = useCallback(async () => {
@@ -38,12 +78,12 @@ export function useBentoShortcuts({ setGroups }: UseBentoShortcutsParams) {
 				shortcuts: shortcuts
 					.filter((shortcut) => shortcut.group_id === group.id)
 					.sort((a, b) => a.sort_order - b.sort_order)
-					.map(({ id, name, target, source, reservePath2icon, icon }) => ({
+					.map(({ id, name, target, source, reserve_path2icon, icon }) => ({
 						id,
 						name,
 						target,
 						source,
-						reservePath2icon,
+						reserve_path2icon: reserve_path2icon ?? undefined,
 						icon,
 					})),
 			})),
