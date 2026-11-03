@@ -2,7 +2,8 @@ import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { FolderOpen } from "lucide-react";
 import { type SubmitEvent, useState } from "react";
-import type { DataFromExe, PickedExe } from "../../../types/exe";
+import { iconFileFilters } from "../../../shared/dialogPlugin/fileDialogFilters";
+import type { DataFromExe, PickedExe } from "../../../shared/types/exe";
 
 import styles from "./CreateShortcutModal.module.css";
 
@@ -79,13 +80,7 @@ export function CreateShortcutModal({
 				title: "Выберите файл иконки",
 				multiple: false,
 				directory: false,
-				filters: [
-					{
-						name: "Файлы иконок",
-						extensions: ["ico", "png", "jpg", "jpeg", "svg", "webp", "icns"],
-					},
-					{ name: "Все файлы", extensions: ["*"] },
-				],
+				filters: iconFileFilters,
 			});
 
 			if (typeof selected === "string") {

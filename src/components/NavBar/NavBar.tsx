@@ -2,7 +2,7 @@ import { listen } from "@tauri-apps/api/event";
 import { useEffect, useState } from "react";
 
 import { useBentoGroups } from "../../hooks/useBentoGroups";
-import type { ViewName } from "../../types/View";
+import type { ViewName } from "../../shared/types/View";
 import WindowFocusIndicator from "../WindowFocusIndicator/WindowFocusIndicator";
 
 import styles from "./NavBar.module.css";
