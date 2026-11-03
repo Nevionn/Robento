@@ -2,24 +2,9 @@ import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { FolderOpen } from "lucide-react";
 import { type SubmitEvent, useEffect, useState } from "react";
-
+import type { DataFromExe, PickedExe } from "../../../types/exe";
 import type { Shortcut } from "../../BentoGrid/BentoGrid";
 import styles from "../CreateShortcutModal/CreateShortcutModal.module.css";
-
-interface PickedExe {
-	name: string;
-	target: string;
-	source: string;
-	icon: string | null;
-}
-
-export interface DataFromExe {
-	target: string;
-	source: string;
-	reserve_path2icon: string | null;
-	name: string;
-	icon: string | null;
-}
 
 interface EditShortcutModalProps {
 	isOpen: boolean;
