@@ -53,6 +53,13 @@ export function EditShortcutModal({
 
 	const isBusy = isSubmitting || isPickingFile;
 
+	const hasChanges =
+		target !== shortcut.target ||
+		name !== shortcut.name ||
+		source !== shortcut.source ||
+		icon !== shortcut.icon ||
+		reserve_path2icon !== (shortcut.reserve_path2icon ?? "");
+
 	const handlePickTarget = async () => {
 		setIsPickingFile(true);
 		setError("");
@@ -248,7 +255,7 @@ export function EditShortcutModal({
 						<button
 							className={`${styles.button} ${styles.createButton}`}
 							type="submit"
-							disabled={isBusy}
+							disabled={isBusy || !hasChanges}
 						>
 							{isSubmitting
 								? "Сохранение..."

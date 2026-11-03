@@ -184,7 +184,7 @@ export function CreateShortcutModal({
 					</div>
 
 					<label className={styles.label} htmlFor="shortcut-name">
-						Название ярлыка
+						Название ярлыка (необязательно)
 					</label>
 
 					<input
@@ -240,7 +240,7 @@ export function CreateShortcutModal({
 						<button
 							className={`${styles.button} ${styles.createButton}`}
 							type="submit"
-							disabled={isBusy}
+							disabled={isBusy || !target.trim()}
 						>
 							{isSubmitting
 								? "Сохранение..."
