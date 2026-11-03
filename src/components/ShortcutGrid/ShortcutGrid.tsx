@@ -7,17 +7,22 @@ interface Props {
 	groupId: string;
 	shortcuts: Shortcut[];
 	onDeleteShortcut: (id: string) => Promise<void>;
+	onEditShortcut: (shortcut: Shortcut) => void;
 }
 
 /**
  * Сетка ярлыков.
- * Отображение списка ярлыков группы.
+ *
+ * Отвечает за:
+ * Отображение ярлыков группы.
+ * Передачу обработчиков удаления и редактирования.
  */
 
 export default function ShortcutGrid({
 	groupId,
 	shortcuts,
 	onDeleteShortcut,
+	onEditShortcut,
 }: Props) {
 	return (
 		<SortableContext
@@ -33,6 +38,7 @@ export default function ShortcutGrid({
 					icon={shortcut.icon}
 					target={shortcut.target}
 					onDelete={onDeleteShortcut}
+					onEdit={() => onEditShortcut(shortcut)}
 				/>
 			))}
 		</SortableContext>

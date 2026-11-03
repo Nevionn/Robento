@@ -13,17 +13,18 @@ interface Props {
 	icon: string | null;
 	target: string;
 	onDelete: (id: string) => Promise<void>;
+	onEdit: () => void;
 }
 
 /**
  * Компонент ярлыка.
  *
  * Отвечает за:
- * - Отображение ярлыка и его иконки.
- * - Перетаскивание ярлыка с помощью dnd-kit.
- * - Запуск программы по левому клику.
- * - Открытие контекстного меню по правому клику.
- * - Запуск программы и удаление ярлыка через контекстное меню.
+ * Отображение ярлыка и его иконки.
+ * Перетаскивание ярлыка с помощью dnd-kit.
+ * Запуск программы по левому клику.
+ * Открытие контекстного меню.
+ * Редактирование и удаление ярлыка.
  */
 
 export default function SortableShortcut({
@@ -33,6 +34,7 @@ export default function SortableShortcut({
 	icon,
 	target,
 	onDelete,
+	onEdit,
 }: Props) {
 	const {
 		setNodeRef,
@@ -61,15 +63,22 @@ export default function SortableShortcut({
 	}
 
 	async function handleLaunchViaContext() {
-		await handleClick()
-			.then(() => setContextMenu(null))
-			.catch((error) => console.error("Не удалось запустить ярлык:", error));
+		await handleClick();
+		setContextMenu(null);
 	}
 
 	async function handleDeleteViaContext() {
-		await onDelete(id)
-			.then(() => setContextMenu(null))
-			.catch((error) => console.error("Не удалось удалить ярлык:", error));
+		try {
+			await onDelete(id);
+			setContextMenu(null);
+		} catch (error) {
+			console.error("Не удалось удалить ярлык:", error);
+		}
+	}
+
+	function handleEditViaContext() {
+		setContextMenu(null);
+		onEdit();
 	}
 
 	return (
@@ -115,6 +124,7 @@ export default function SortableShortcut({
 					onClose={() => setContextMenu(null)}
 					onLaunch={handleLaunchViaContext}
 					onDelete={handleDeleteViaContext}
+					onEdit={handleEditViaContext}
 				/>
 			)}
 		</>

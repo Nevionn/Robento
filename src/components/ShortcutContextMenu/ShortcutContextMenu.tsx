@@ -9,6 +9,7 @@ interface Props {
 	onClose: () => void;
 	onLaunch: () => Promise<void>;
 	onDelete: () => Promise<void>;
+	onEdit: () => void;
 }
 
 /**
@@ -24,6 +25,7 @@ export default function ShortcutContextMenu({
 	onClose,
 	onLaunch,
 	onDelete,
+	onEdit,
 }: Props) {
 	const menuRef = useRef<HTMLDivElement>(null);
 
@@ -74,7 +76,10 @@ export default function ShortcutContextMenu({
 				className={styles.menuItem}
 				type="button"
 				role="menuitem"
-				onClick={onClose}
+				onClick={() => {
+					onEdit();
+					onClose();
+				}}
 			>
 				Редактировать
 			</button>

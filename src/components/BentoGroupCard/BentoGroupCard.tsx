@@ -1,7 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-import type { BentoGroup } from "../BentoGrid/BentoGrid";
+import type { BentoGroup, Shortcut } from "../BentoGrid/BentoGrid";
 import ShortcutGrid from "../ShortcutGrid/ShortcutGrid";
 import styles from "./BentoGroupCard.module.css";
 
@@ -10,12 +10,16 @@ interface Props {
 	isSelected: boolean;
 	onSelect: (id: string) => void;
 	onDeleteShortcut: (id: string) => Promise<void>;
+	onEditShortcut: (shortcut: Shortcut) => void;
 }
 
 /**
- * Компонент отдельной группы.
- * Визуальное перемещение гупп.
- * @param {BentoGroup} props.group.
+ * Карточка группы.
+ *
+ * Отвечает за:
+ * onSelect: Выбирает группу.
+ * onDeleteShortcut: Удаляет ярлык.
+ * onEditShortcut: Открывает редактирование ярлыка.
  */
 
 export default function BentoGroupCard({
@@ -23,6 +27,7 @@ export default function BentoGroupCard({
 	isSelected,
 	onSelect,
 	onDeleteShortcut,
+	onEditShortcut,
 }: Props) {
 	const {
 		setNodeRef,
@@ -59,6 +64,7 @@ export default function BentoGroupCard({
 					groupId={group.id}
 					shortcuts={group.shortcuts}
 					onDeleteShortcut={onDeleteShortcut}
+					onEditShortcut={onEditShortcut}
 				/>
 			</div>
 		</div>

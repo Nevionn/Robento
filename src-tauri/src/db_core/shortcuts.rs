@@ -181,6 +181,73 @@ pub async fn get_shortcuts(pool: tauri::State<'_, SqlitePool>) -> Result<Vec<Sho
 }
 
 #[tauri::command]
+pub async fn update_shortcut(
+    pool: tauri::State<'_, SqlitePool>,
+    id: String,
+    name: String,
+    target: String,
+    icon: Option<String>,
+    reserve_path2icon: Option<String>,
+) -> Result<ShortcutDto, String> {
+    let result = sqlx::query(
+        r#"
+        UPDATE Shortcuts
+        SET
+            name = ?,
+            target = ?,
+            icon = ?,
+            reserve_path2icon = ?
+        WHERE id = ?
+        "#,
+    )
+    .bind(&name)
+    .bind(&target)
+    .bind(&icon)
+    .bind(&reserve_path2icon)
+    .bind(&id)
+    .execute(pool.inner())
+    .await
+    .map_err(|e| e.to_string())?;
+
+    if result.rows_affected() == 0 {
+        return Err(format!("Ярлык с id '{id}' не найден"));
+    }
+
+    let row = sqlx::query(
+        r#"
+        SELECT
+            id,
+            group_id,
+            name,
+            target,
+            source,
+            icon,
+            reserve_path2icon,
+            sort_order,
+            created_at
+        FROM Shortcuts
+        WHERE id = ?
+        "#,
+    )
+    .bind(&id)
+    .fetch_one(pool.inner())
+    .await
+    .map_err(|e| e.to_string())?;
+
+    Ok(ShortcutDto {
+        id: row.get("id"),
+        group_id: row.get("group_id"),
+        name: row.get("name"),
+        target: row.get("target"),
+        source: row.get("source"),
+        icon: row.get("icon"),
+        reserve_path2icon: row.get("reserve_path2icon"),
+        sort_order: row.get("sort_order"),
+        created_at: row.get("created_at"),
+    })
+}
+
+#[tauri::command]
 pub async fn update_shortcuts_order(
     pool: tauri::State<'_, SqlitePool>,
     shortcuts: Vec<(String, String, i64)>,

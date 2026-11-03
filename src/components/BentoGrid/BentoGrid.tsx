@@ -17,6 +17,8 @@ import { filterBentoGroups } from "../../utils/filterBentoGroups";
 import BentoGroupCard from "../BentoGroupCard/BentoGroupCard";
 import { CreateGroupModal } from "../modals/CreateGroupModal/CreateGroupModal";
 import { CreateShortcutModal } from "../modals/CreateShortcutModal/CreateShortcutModal";
+import { EditShortcutModal } from "../modals/EditShortcutModal/EditShortcutModal";
+
 import styles from "./BentoGrid.module.css";
 import BentoSearch from "./Search/BentoSearch";
 
@@ -25,7 +27,7 @@ export interface Shortcut {
 	name: string;
 	target: string;
 	source: string;
-	reserve_path2icon?: string;
+	reserve_path2icon?: string | null;
 	icon: string | null;
 }
 
@@ -51,6 +53,7 @@ export default function BentoGrid() {
 	const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 	const [modalMode, setModalMode] = useState<"create" | "edit">("create");
 	const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+	const [editingShortcut, setEditingShortcut] = useState<Shortcut | null>(null);
 
 	const [isCreateShortcutModalOpen, setIsCreateShortcutModalOpen] =
 		useState(false);
@@ -63,9 +66,10 @@ export default function BentoGrid() {
 		useBentoGroups({
 			setGroups,
 		});
-	const { loadShortcuts, createShortcut, deleteShortcut } = useBentoShortcuts({
-		setGroups,
-	});
+	const { loadShortcuts, createShortcut, updateShortcut, deleteShortcut } =
+		useBentoShortcuts({
+			setGroups,
+		});
 
 	const { handleDragEnd, collisionDetection } = useBentoDragAndDrop({
 		groups,
@@ -190,6 +194,7 @@ export default function BentoGrid() {
 								isSelected={focusedGroupId === group.id}
 								onSelect={setFocusedGroupId}
 								onDeleteShortcut={deleteShortcut}
+								onEditShortcut={setEditingShortcut}
 							/>
 						))}
 					</div>
@@ -231,6 +236,13 @@ export default function BentoGrid() {
 						reserve_path2icon: data.reserve_path2icon || undefined,
 					});
 				}}
+			/>
+
+			<EditShortcutModal
+				isOpen={editingShortcut !== null}
+				shortcut={editingShortcut}
+				onClose={() => setEditingShortcut(null)}
+				onSave={updateShortcut}
 			/>
 		</div>
 	);

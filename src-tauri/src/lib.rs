@@ -12,7 +12,8 @@ use db_core::groups::{
 };
 
 use db_core::shortcuts::{
-    create_shortcut, delete_shortcut, get_shortcuts, init_shortcuts_table, update_shortcuts_order,
+    create_shortcut, delete_shortcut, get_shortcuts, init_shortcuts_table, update_shortcut,
+    update_shortcuts_order,
 };
 
 use os_core::autostart::set_launch_on_startup;
@@ -54,6 +55,7 @@ pub fn run() {
             create_shortcut,
             get_shortcuts,
             update_shortcuts_order,
+            update_shortcut,
             delete_shortcut,
             create_group,
             get_groups,

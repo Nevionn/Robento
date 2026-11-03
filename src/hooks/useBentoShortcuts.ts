@@ -90,6 +90,47 @@ export function useBentoShortcuts({ setGroups }: UseBentoShortcutsParams) {
 		);
 	}, [setGroups]);
 
+	const updateShortcut = useCallback(
+		async (
+			id: string,
+			shortcut: Pick<
+				Shortcut,
+				"name" | "target" | "icon" | "reserve_path2icon"
+			>,
+		) => {
+			try {
+				const saved = await invoke<SavedShortcut>("update_shortcut", {
+					id,
+					name: shortcut.name,
+					target: shortcut.target,
+					icon: shortcut.icon,
+					reserve_path2icon: shortcut.reserve_path2icon ?? null,
+				});
+
+				setGroups((prev) =>
+					prev.map((group) => ({
+						...group,
+						shortcuts: group.shortcuts.map((item) =>
+							item.id === id
+								? {
+										...item,
+										name: saved.name,
+										target: saved.target,
+										icon: saved.icon,
+										reserve_path2icon: saved.reserve_path2icon ?? undefined,
+									}
+								: item,
+						),
+					})),
+				);
+			} catch (error) {
+				console.error("Не удалось обновить ярлык:", error);
+				throw error;
+			}
+		},
+		[setGroups],
+	);
+
 	const updateShortcutsOrder = useCallback(
 		async (
 			shortcuts: {
@@ -136,6 +177,7 @@ export function useBentoShortcuts({ setGroups }: UseBentoShortcutsParams) {
 	return {
 		createShortcut,
 		loadShortcuts,
+		updateShortcut,
 		updateShortcutsOrder,
 		deleteShortcut,
 	};
