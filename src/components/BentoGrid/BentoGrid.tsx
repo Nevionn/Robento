@@ -15,6 +15,7 @@ import { useBentoShortcuts } from "../../hooks/useBentoShortcuts";
 import { filterBentoGroups } from "../../utils/filterBentoGroups";
 
 import BentoGroupCard from "../BentoGroupCard/BentoGroupCard";
+import Hotkeys from "../Hotkeys/Hotkeys";
 import { CreateGroupModal } from "../modals/CreateGroupModal/CreateGroupModal";
 import { CreateShortcutModal } from "../modals/CreateShortcutModal/CreateShortcutModal";
 import { EditShortcutModal } from "../modals/EditShortcutModal/EditShortcutModal";
@@ -172,6 +173,8 @@ export default function BentoGrid() {
 			<div className={styles.search}>
 				<BentoSearch value={searchQuery} onChange={setSearchQuery} />
 			</div>
+
+			{groups.length === 0 && <Hotkeys />}
 
 			<DndContext
 				sensors={sensors}
