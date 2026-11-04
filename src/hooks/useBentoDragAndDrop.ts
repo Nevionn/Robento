@@ -31,18 +31,32 @@ export function useBentoDragAndDrop({
 	const collisionDetection: CollisionDetection = useCallback((args) => {
 		const activeType = args.active.data.current?.type;
 
-		if (!activeType) {
-			return closestCenter(args);
+		if (activeType === "shortcut") {
+			const droppableContainers = args.droppableContainers.filter(
+				(container) => {
+					const type = container.data.current?.type;
+					return type === "shortcut" || type === "group";
+				},
+			);
+
+			return closestCenter({
+				...args,
+				droppableContainers,
+			});
 		}
 
-		const droppableContainers = args.droppableContainers.filter(
-			(container) => container.data.current?.type === activeType,
-		);
+		if (activeType === "group") {
+			const droppableContainers = args.droppableContainers.filter(
+				(container) => container.data.current?.type === "group",
+			);
 
-		return closestCenter({
-			...args,
-			droppableContainers,
-		});
+			return closestCenter({
+				...args,
+				droppableContainers,
+			});
+		}
+
+		return closestCenter(args);
 	}, []);
 
 	const handleDragEnd = useCallback(
@@ -51,6 +65,7 @@ export function useBentoDragAndDrop({
 
 			const activeType = active.data.current?.type;
 
+			// Перемещение групп
 			if (activeType === "group") {
 				const oldIndex = groups.findIndex(
 					(group) => group.id === String(active.id),
@@ -76,45 +91,129 @@ export function useBentoDragAndDrop({
 				return;
 			}
 
+			// Перемещение ярлыков
 			if (activeType === "shortcut") {
-				const groupId = active.data.current?.groupId as string;
-				const group = groups.find((item) => item.id === groupId);
+				const shortcutId = String(active.id);
+				const sourceGroupId = active.data.current?.groupId as string;
 
-				if (!group) return;
+				const overType = over.data.current?.type;
 
-				const oldIndex = group.shortcuts.findIndex(
-					(shortcut) => shortcut.id === String(active.id),
+				const targetGroupId =
+					overType === "shortcut"
+						? (over.data.current?.groupId as string)
+						: overType === "group"
+							? String(over.id)
+							: null;
+
+				if (!targetGroupId) return;
+
+				const sourceGroup = groups.find((group) => group.id === sourceGroupId);
+				const targetGroup = groups.find((group) => group.id === targetGroupId);
+
+				if (!sourceGroup || !targetGroup) return;
+
+				const activeShortcut = sourceGroup.shortcuts.find(
+					(shortcut) => shortcut.id === shortcutId,
 				);
-				const newIndex = group.shortcuts.findIndex(
-					(shortcut) => shortcut.id === String(over.id),
-				);
 
-				if (oldIndex < 0 || newIndex < 0) return;
+				if (!activeShortcut) return;
 
 				const previousGroups = groups;
-				const nextGroups = groups.map((item) =>
-					item.id === groupId
-						? {
-								...item,
-								shortcuts: arrayMove(item.shortcuts, oldIndex, newIndex),
-							}
-						: item,
+
+				// Перемещение внутри одной группы
+				if (sourceGroupId === targetGroupId) {
+					const oldIndex = sourceGroup.shortcuts.findIndex(
+						(shortcut) => shortcut.id === shortcutId,
+					);
+
+					const newIndex =
+						overType === "shortcut"
+							? sourceGroup.shortcuts.findIndex(
+									(shortcut) => shortcut.id === String(over.id),
+								)
+							: sourceGroup.shortcuts.length - 1;
+
+					if (oldIndex < 0 || newIndex < 0 || oldIndex === newIndex) {
+						return;
+					}
+
+					const nextShortcuts = arrayMove(
+						sourceGroup.shortcuts,
+						oldIndex,
+						newIndex,
+					);
+
+					const nextGroups = groups.map((group) =>
+						group.id === sourceGroupId
+							? { ...group, shortcuts: nextShortcuts }
+							: group,
+					);
+
+					setGroups(nextGroups);
+
+					try {
+						await updateShortcutsOrder(
+							nextShortcuts.map((shortcut, index) => ({
+								id: shortcut.id,
+								groupId: sourceGroupId,
+								sortOrder: index,
+							})),
+						);
+					} catch (error) {
+						console.error("Failed to save shortcut order:", error);
+						setGroups(previousGroups);
+					}
+
+					return;
+				}
+
+				// Перемещение в другую группу
+				const sourceShortcuts = sourceGroup.shortcuts.filter(
+					(shortcut) => shortcut.id !== shortcutId,
 				);
+
+				const targetShortcuts = [...targetGroup.shortcuts];
+
+				const targetIndex =
+					overType === "shortcut"
+						? targetShortcuts.findIndex(
+								(shortcut) => shortcut.id === String(over.id),
+							)
+						: targetShortcuts.length;
+
+				targetShortcuts.splice(
+					targetIndex < 0 ? targetShortcuts.length : targetIndex,
+					0,
+					activeShortcut,
+				);
+
+				const nextGroups = groups.map((group) => {
+					if (group.id === sourceGroupId) {
+						return { ...group, shortcuts: sourceShortcuts };
+					}
+
+					if (group.id === targetGroupId) {
+						return { ...group, shortcuts: targetShortcuts };
+					}
+
+					return group;
+				});
 
 				setGroups(nextGroups);
 
 				try {
-					const updatedGroup = nextGroups.find((item) => item.id === groupId);
-
-					if (!updatedGroup) return;
-
-					await updateShortcutsOrder(
-						updatedGroup.shortcuts.map((shortcut, index) => ({
+					await updateShortcutsOrder([
+						...sourceShortcuts.map((shortcut, index) => ({
 							id: shortcut.id,
-							groupId,
+							groupId: sourceGroupId,
 							sortOrder: index,
 						})),
-					);
+						...targetShortcuts.map((shortcut, index) => ({
+							id: shortcut.id,
+							groupId: targetGroupId,
+							sortOrder: index,
+						})),
+					]);
 				} catch (error) {
 					console.error("Failed to save shortcut order:", error);
 					setGroups(previousGroups);
