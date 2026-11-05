@@ -2,6 +2,8 @@ import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { FolderOpen } from "lucide-react";
 import { type SubmitEvent, useState } from "react";
+import { useTranslation } from "react-i18next";
+
 import { iconFileFilters } from "../../../shared/dialogPlugin/fileDialogFilters";
 import type { DataFromExe, PickedExe } from "../../../shared/types/exe";
 
@@ -27,6 +29,8 @@ export function CreateShortcutModal({
 	onClose,
 	onSave,
 }: CreateShortcutModalProps) {
+	const { t } = useTranslation();
+
 	const [target, setTarget] = useState("");
 	const [source, setSource] = useState("");
 	const [name, setName] = useState("");
@@ -77,7 +81,7 @@ export function CreateShortcutModal({
 
 		try {
 			const selected = await open({
-				title: "Выберите файл иконки",
+				title: t("CreateShortcutModal.iconDialogTitle"),
 				multiple: false,
 				directory: false,
 				filters: iconFileFilters,
@@ -100,7 +104,7 @@ export function CreateShortcutModal({
 		const trimmedTarget = target.trim();
 
 		if (!trimmedTarget) {
-			setError("Укажите путь к исполняемому файлу");
+			setError(t("CreateShortcutModal.emptyTarget"));
 			return;
 		}
 
@@ -120,7 +124,7 @@ export function CreateShortcutModal({
 			onClose();
 		} catch (error) {
 			console.error("Не удалось создать ярлык:", error);
-			setError("Не удалось создать ярлык");
+			setError(t("CreateShortcutModal.createError"));
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -142,12 +146,12 @@ export function CreateShortcutModal({
 				aria-labelledby="shortcut-modal-title"
 			>
 				<h2 id="shortcut-modal-title" className={styles.title}>
-					Создание ярлыка
+					{t("CreateShortcutModal.title")}
 				</h2>
 
 				<form onSubmit={handleSubmit}>
 					<label className={styles.label} htmlFor="shortcut-target">
-						Путь к исполняемому файлу
+						{t("CreateShortcutModal.targetLabel")}
 					</label>
 
 					<div className={styles.inputRow}>
@@ -161,7 +165,7 @@ export function CreateShortcutModal({
 								setSource(event.target.value);
 								setError("");
 							}}
-							placeholder="Путь"
+							placeholder={t("CreateShortcutModal.targetPlaceholder")}
 							autoFocus
 							disabled={isBusy}
 						/>
@@ -169,8 +173,8 @@ export function CreateShortcutModal({
 						<button
 							className={styles.browseButton}
 							type="button"
-							title="Выбрать исполняемый файл"
-							aria-label="Выбрать исполняемый файл"
+							title={t("CreateShortcutModal.pickExecutable")}
+							aria-label={t("CreateShortcutModal.pickExecutable")}
 							onClick={() => void handlePickTarget()}
 							disabled={isBusy}
 						>
@@ -179,7 +183,7 @@ export function CreateShortcutModal({
 					</div>
 
 					<label className={styles.label} htmlFor="shortcut-name">
-						Название ярлыка (необязательно)
+						{t("CreateShortcutModal.nameLabel")}
 					</label>
 
 					<input
@@ -191,12 +195,12 @@ export function CreateShortcutModal({
 							setName(event.target.value);
 							setError("");
 						}}
-						placeholder="Название"
+						placeholder={t("CreateShortcutModal.namePlaceholder")}
 						disabled={isBusy}
 					/>
 
 					<label className={styles.label} htmlFor="shortcut-reserve-icon">
-						Резервная иконка (необязательно)
+						{t("CreateShortcutModal.reserveIconLabel")}
 					</label>
 
 					<div className={styles.inputRow}>
@@ -209,15 +213,15 @@ export function CreateShortcutModal({
 								setReservePath2icon(event.target.value);
 								setError("");
 							}}
-							placeholder="Путь к файлу иконки"
+							placeholder={t("CreateShortcutModal.reserveIconPlaceholder")}
 							disabled={isBusy}
 						/>
 
 						<button
 							className={styles.browseButton}
 							type="button"
-							title="Выбрать файл резервной иконки"
-							aria-label="Выбрать файл резервной иконки"
+							title={t("CreateShortcutModal.pickReserveIcon")}
+							aria-label={t("CreateShortcutModal.pickReserveIcon")}
 							onClick={() => void handlePickIcon()}
 							disabled={isBusy}
 						>
@@ -238,10 +242,10 @@ export function CreateShortcutModal({
 							disabled={isBusy || !target.trim()}
 						>
 							{isSubmitting
-								? "Сохранение..."
+								? t("actionButton.saving")
 								: isPickingFile
-									? "Выбор файла..."
-									: "Создать"}
+									? t("actionButton.pickingFile")
+									: t("actionButton.create")}
 						</button>
 
 						<button
@@ -250,7 +254,7 @@ export function CreateShortcutModal({
 							onClick={handleClose}
 							disabled={isBusy}
 						>
-							Отмена
+							{t("actionButton.cancel")}
 						</button>
 					</div>
 				</form>

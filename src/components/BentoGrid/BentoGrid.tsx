@@ -6,6 +6,7 @@ import {
 } from "@dnd-kit/core";
 import { rectSortingStrategy, SortableContext } from "@dnd-kit/sortable";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { useBentoDragAndDrop } from "../../hooks/useBentoDragAndDrop";
 import { useBentoGroups } from "../../hooks/useBentoGroups";
@@ -46,6 +47,8 @@ export interface BentoGroup {
  */
 
 export default function BentoGrid() {
+	const { t } = useTranslation();
+
 	const [groups, setGroups] = useState<BentoGroup[]>([]);
 	const [focusedGroupId, setFocusedGroupId] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
@@ -162,7 +165,9 @@ export default function BentoGrid() {
 
 	if (error) {
 		return (
-			<div className={styles.wrapper}>Не удалось загрузить группы: {error}</div>
+			<div className={styles.wrapper}>
+				{t("BentoGrid.loadError", { error })}
+			</div>
 		);
 	}
 
@@ -186,7 +191,7 @@ export default function BentoGrid() {
 					strategy={rectSortingStrategy}
 				>
 					{isSearchActive && filteredGroups.length > 0 && (
-						<p className={styles.helperSearch}>Перетаскивание отключено</p>
+						<p className={styles.helperSearch}>{t("BentoGrid.dragDisabled")}</p>
 					)}
 
 					<div className={styles.bentoGrid}>
@@ -203,7 +208,7 @@ export default function BentoGrid() {
 					</div>
 
 					{searchQuery.trim() !== "" && filteredGroups.length === 0 && (
-						<p className={styles.emptySearch}>Ничего не найдено</p>
+						<p className={styles.emptySearch}>{t("BentoGrid.emptySearch")}</p>
 					)}
 				</SortableContext>
 			</DndContext>
@@ -228,7 +233,7 @@ export default function BentoGrid() {
 				onClose={() => setIsCreateShortcutModalOpen(false)}
 				onSave={async (data) => {
 					if (!focusedGroupId) {
-						throw new Error("Сначала выберите группу");
+						throw new Error(t("BentoGrid.selectGroupFirst"));
 					}
 
 					await createShortcut(focusedGroupId, {

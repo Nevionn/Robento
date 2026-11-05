@@ -2,6 +2,8 @@ import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { FolderOpen } from "lucide-react";
 import { type SubmitEvent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+
 import { iconFileFilters } from "../../../shared/dialogPlugin/fileDialogFilters";
 import type { DataFromExe, PickedExe } from "../../../shared/types/exe";
 import type { Shortcut } from "../../BentoGrid/BentoGrid";
@@ -29,6 +31,8 @@ export function EditShortcutModal({
 	onClose,
 	onSave,
 }: EditShortcutModalProps) {
+	const { t } = useTranslation();
+
 	const [target, setTarget] = useState("");
 	const [source, setSource] = useState("");
 	const [name, setName] = useState("");
@@ -88,7 +92,7 @@ export function EditShortcutModal({
 
 		try {
 			const selected = await open({
-				title: "Выберите файл резервной иконки",
+				title: t("EditShortcutModal.iconDialogTitle"),
 				multiple: false,
 				directory: false,
 				filters: iconFileFilters,
@@ -112,12 +116,12 @@ export function EditShortcutModal({
 		const trimmedName = name.trim();
 
 		if (!trimmedTarget) {
-			setError("Укажите путь к исполняемому файлу");
+			setError(t("EditShortcutModal.emptyTarget"));
 			return;
 		}
 
 		if (!trimmedName) {
-			setError("Укажите название ярлыка");
+			setError(t("EditShortcutModal.emptyName"));
 			return;
 		}
 
@@ -136,7 +140,7 @@ export function EditShortcutModal({
 			onClose();
 		} catch (error) {
 			console.error("Не удалось изменить ярлык:", error);
-			setError("Не удалось сохранить изменения ярлыка");
+			setError(t("EditShortcutModal.saveError"));
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -157,12 +161,12 @@ export function EditShortcutModal({
 				aria-labelledby="edit-shortcut-modal-title"
 			>
 				<h2 id="edit-shortcut-modal-title" className={styles.title}>
-					Редактирование ярлыка
+					{t("EditShortcutModal.title")}
 				</h2>
 
 				<form onSubmit={handleSubmit}>
 					<label className={styles.label} htmlFor="edit-shortcut-target">
-						Путь к исполняемому файлу
+						{t("EditShortcutModal.targetLabel")}
 					</label>
 
 					<div className={styles.inputRow}>
@@ -176,7 +180,7 @@ export function EditShortcutModal({
 								setSource(event.target.value);
 								setError("");
 							}}
-							placeholder="Путь"
+							placeholder={t("EditShortcutModal.targetPlaceholder")}
 							autoFocus
 							disabled={isBusy}
 						/>
@@ -184,8 +188,8 @@ export function EditShortcutModal({
 						<button
 							className={styles.browseButton}
 							type="button"
-							title="Выбрать исполняемый файл"
-							aria-label="Выбрать исполняемый файл"
+							title={t("EditShortcutModal.pickExecutable")}
+							aria-label={t("EditShortcutModal.pickExecutable")}
 							onClick={() => void handlePickTarget()}
 							disabled={isBusy}
 						>
@@ -194,7 +198,7 @@ export function EditShortcutModal({
 					</div>
 
 					<label className={styles.label} htmlFor="edit-shortcut-name">
-						Название ярлыка
+						{t("EditShortcutModal.nameLabel")}
 					</label>
 
 					<input
@@ -206,12 +210,12 @@ export function EditShortcutModal({
 							setName(event.target.value);
 							setError("");
 						}}
-						placeholder="Название"
+						placeholder={t("EditShortcutModal.namePlaceholder")}
 						disabled={isBusy}
 					/>
 
 					<label className={styles.label} htmlFor="edit-shortcut-reserve-icon">
-						Резервная иконка (необязательно)
+						{t("EditShortcutModal.reserveIconLabel")}
 					</label>
 
 					<div className={styles.inputRow}>
@@ -224,15 +228,15 @@ export function EditShortcutModal({
 								setReservePath2icon(event.target.value);
 								setError("");
 							}}
-							placeholder="Путь к файлу иконки"
+							placeholder={t("EditShortcutModal.reserveIconPlaceholder")}
 							disabled={isBusy}
 						/>
 
 						<button
 							className={styles.browseButton}
 							type="button"
-							title="Выбрать резервную иконку"
-							aria-label="Выбрать резервную иконку"
+							title={t("EditShortcutModal.pickReserveIcon")}
+							aria-label={t("EditShortcutModal.pickReserveIcon")}
 							onClick={() => void handlePickIcon()}
 							disabled={isBusy}
 						>
@@ -253,10 +257,10 @@ export function EditShortcutModal({
 							disabled={isBusy || !hasChanges}
 						>
 							{isSubmitting
-								? "Сохранение..."
+								? t("actionButton.saving")
 								: isPickingFile
-									? "Выбор файла..."
-									: "Сохранить"}
+									? t("actionButton.pickingFile")
+									: t("actionButton.save")}
 						</button>
 
 						<button
@@ -265,7 +269,7 @@ export function EditShortcutModal({
 							onClick={handleClose}
 							disabled={isBusy}
 						>
-							Отмена
+							{t("actionButton.cancel")}
 						</button>
 					</div>
 				</form>

@@ -1,5 +1,6 @@
 // biome-ignore-all lint/correctness/useExhaustiveDependencies: намеренное управление зависимостями useEffect
 import { type SubmitEvent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { BentoGroup } from "../../BentoGrid/BentoGrid";
 import styles from "./CreateGroupModal.module.css";
@@ -31,6 +32,8 @@ export function CreateGroupModal({
 	createGroup,
 	updateGroupTitle,
 }: CreateGroupModalProps) {
+	const { t } = useTranslation();
+
 	const [title, setTitle] = useState("");
 	const [error, setError] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -52,12 +55,12 @@ export function CreateGroupModal({
 		const trimmedTitle = title.trim();
 
 		if (!trimmedTitle) {
-			setError("Введите название группы");
+			setError(t("CreateGroupModal.emptyTitle"));
 			return;
 		}
 
 		if (isEditMode && !groupToEdit) {
-			setError("Группа не найдена");
+			setError(t("CreateGroupModal.groupNotFound"));
 			return;
 		}
 
@@ -77,8 +80,8 @@ export function CreateGroupModal({
 			console.error("Failed to save group:", error);
 			setError(
 				isEditMode
-					? "Не удалось изменить название группы"
-					: "Не удалось создать группу",
+					? t("CreateGroupModal.updateError")
+					: t("CreateGroupModal.createError"),
 			);
 		} finally {
 			setIsSubmitting(false);
@@ -102,12 +105,14 @@ export function CreateGroupModal({
 				aria-labelledby="create-group-title"
 			>
 				<h2 id="create-group-title" className={styles.title}>
-					{isEditMode ? "Редактирование группы" : "Создание группы"}
+					{isEditMode
+						? t("CreateGroupModal.editTitle")
+						: t("CreateGroupModal.createTitle")}
 				</h2>
 
 				<form onSubmit={handleSubmit}>
 					<label className={styles.label} htmlFor="group-title">
-						Название группы
+						{t("CreateGroupModal.groupName")}
 					</label>
 
 					<input
@@ -119,7 +124,7 @@ export function CreateGroupModal({
 							setTitle(event.target.value);
 							setError("");
 						}}
-						placeholder="Введите название"
+						placeholder={t("CreateGroupModal.placeholder")}
 						maxLength={100}
 						autoFocus
 						disabled={isSubmitting}
@@ -138,10 +143,10 @@ export function CreateGroupModal({
 							disabled={isSubmitting}
 						>
 							{isSubmitting
-								? "Сохранение..."
+								? t("actionButton.saving")
 								: isEditMode
-									? "Сохранить"
-									: "Создать"}
+									? t("actionButton.save")
+									: t("actionButton.create")}
 						</button>
 
 						<button
@@ -150,7 +155,7 @@ export function CreateGroupModal({
 							onClick={handleClose}
 							disabled={isSubmitting}
 						>
-							Отмена
+							{t("actionButton.cancel")}
 						</button>
 					</div>
 				</form>

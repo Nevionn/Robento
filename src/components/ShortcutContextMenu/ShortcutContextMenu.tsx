@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 
 import styles from "./ShortcutContextMenu.module.css";
 
@@ -27,6 +28,7 @@ export default function ShortcutContextMenu({
 	onDelete,
 	onEdit,
 }: Props) {
+	const { t } = useTranslation();
 	const menuRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -69,7 +71,7 @@ export default function ShortcutContextMenu({
 				role="menuitem"
 				onClick={() => void onLaunch()}
 			>
-				Запустить
+				{t("ShortcutContextMenu.launch")}
 			</button>
 
 			<button
@@ -81,7 +83,7 @@ export default function ShortcutContextMenu({
 					onClose();
 				}}
 			>
-				Редактировать
+				{t("ShortcutContextMenu.edit")}
 			</button>
 
 			<button
@@ -90,7 +92,7 @@ export default function ShortcutContextMenu({
 				role="menuitem"
 				onClick={() => void onDelete()}
 			>
-				Удалить
+				{t("ShortcutContextMenu.delete")}
 			</button>
 		</div>,
 		document.body,
