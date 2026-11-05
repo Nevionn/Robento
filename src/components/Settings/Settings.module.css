@@ -220,3 +220,52 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+/* Выбор языка */
+
+.languageRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.languageSelect {
+    min-width: 130px;
+    padding: 9px 32px 9px 12px;
+
+    appearance: none;
+    background-color: rgba(17, 17, 27, 0.65);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='m2 4 4 4 4-4' fill='none' stroke='%23cdd6f4' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+
+    border: 1px solid rgba(108, 112, 134, 0.55);
+    border-radius: 6px;
+
+    color: var(--text-primary);
+    font-family: var(--font-general);
+    font-size: 13px;
+
+    cursor: pointer;
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        background-color 0.2s ease;
+}
+
+.languageSelect:hover {
+    background: rgba(49, 50, 68, 0.8);
+    border-color: rgba(137, 180, 250, 0.7);
+}
+
+.languageSelect:focus-visible {
+    outline: 2px solid rgba(137, 180, 250, 0.35);
+    outline-offset: 2px;
+}
+
+.languageSelect option {
+    background: #1e1e2e;
+    color: #cdd6f4;
+}

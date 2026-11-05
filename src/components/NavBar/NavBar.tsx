@@ -1,6 +1,6 @@
 import { listen } from "@tauri-apps/api/event";
 import { useEffect, useState } from "react";
-
+import { useTranslation } from "react-i18next";
 import { useBentoGroups } from "../../hooks/useBentoGroups";
 import type { ViewName } from "../../shared/types/View";
 import WindowFocusIndicator from "../WindowFocusIndicator/WindowFocusIndicator";
@@ -25,6 +25,8 @@ export default function NavBar({ activeView, setActiveView }: NavBarProps) {
 	const { checkHasGroups } = useBentoGroups({
 		setGroups: () => {},
 	});
+
+	const { t } = useTranslation();
 
 	useEffect(() => {
 		let unlistenCreated: (() => void) | undefined;
@@ -76,7 +78,7 @@ export default function NavBar({ activeView, setActiveView }: NavBarProps) {
 					}`}
 					onClick={() => setActiveView("grid")}
 				>
-					Сетка
+					{t("navigation.grid")}
 				</button>
 
 				<button
@@ -85,7 +87,7 @@ export default function NavBar({ activeView, setActiveView }: NavBarProps) {
 					}`}
 					onClick={() => setActiveView("settings")}
 				>
-					Настройки
+					{t("navigation.settings")}
 				</button>
 
 				{hasGroups && (
@@ -95,7 +97,7 @@ export default function NavBar({ activeView, setActiveView }: NavBarProps) {
 						}`}
 						onClick={() => setActiveView("hotkeys")}
 					>
-						Клавиши
+						{t("navigation.hotkeys")}
 					</button>
 				)}
 			</nav>

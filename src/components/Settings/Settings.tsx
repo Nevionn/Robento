@@ -1,8 +1,11 @@
 import { invoke } from "@tauri-apps/api/core";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
+import { useLanguage } from "../../i18n/useLanguage";
 import { useSettings } from "../context/SettingsProvider";
+
 import styles from "./Settings.module.css";
 
 /**
@@ -13,6 +16,8 @@ import styles from "./Settings.module.css";
 
 export default function Settings() {
 	const { settings, updateGeneral } = useSettings();
+	const { t } = useTranslation();
+	const { currentLanguage, changeLanguage } = useLanguage();
 
 	const [databasePath, setDatabasePath] = useState<string>("");
 	const [copied, setCopied] = useState(false);
@@ -64,8 +69,9 @@ export default function Settings() {
 
 	return (
 		<section className={styles.wrapper}>
+			{/* Общее */}
 			<div className={styles.section}>
-				<h2 className={styles.title}>Общее</h2>
+				<h2 className={styles.title}>{t("settings.general")}</h2>
 
 				<label className={styles.option}>
 					<input
@@ -76,7 +82,7 @@ export default function Settings() {
 						}
 					/>
 					<span className={styles.checkbox} />
-					<span>Запускать Robento при запуске системы</span>
+					<span>{t("settings.launchOnStartup")}</span>
 				</label>
 
 				<label className={styles.option}>
@@ -88,7 +94,7 @@ export default function Settings() {
 						}
 					/>
 					<span className={styles.checkbox} />
-					<span>Скрывать Robento, если потерян фокус</span>
+					<span>{t("settings.hideOnBlur")}</span>
 				</label>
 
 				<label className={styles.option}>
@@ -100,21 +106,44 @@ export default function Settings() {
 						}
 					/>
 					<span className={styles.checkbox} />
-					<span>Игровой режим</span>
+					<span>{t("settings.gameMode")}</span>
 				</label>
 			</div>
 
+			{/* Язык приложения */}
 			<div className={styles.section}>
-				<h2 className={styles.title}>Системная информация</h2>
+				<h2 className={styles.title}>{t("settings.language")}</h2>
 
-				<div className={styles.pathLabel}>Директория данных</div>
+				<div className={styles.languageRow}>
+					<span className={styles.pathLabel}>
+						{t("settings.selectLanguage")}
+					</span>
+
+					<select
+						className={styles.languageSelect}
+						value={currentLanguage}
+						onChange={(event) =>
+							void changeLanguage(event.target.value as "eu" | "ru")
+						}
+					>
+						<option value="eu">English</option>
+						<option value="ru">Русский</option>
+					</select>
+				</div>
+			</div>
+
+			{/* Системная информция */}
+			<div className={styles.section}>
+				<h2 className={styles.title}>{t("settings.systemInfo")}</h2>
+
+				<div className={styles.pathLabel}>{t("settings.dataDirectory")}</div>
 
 				<div className={styles.pathRow}>
 					<div
 						className={`${styles.pathValue} ${copied ? styles.pathCopied : ""}`}
 						title={databasePath}
 					>
-						{databasePath || "Загрузка пути..."}
+						{databasePath || t("settings.loadingPath")}
 					</div>
 
 					<button
@@ -123,7 +152,7 @@ export default function Settings() {
 						onClick={handleCopyPath}
 						disabled={!databasePath}
 					>
-						{copied ? "Скопировано ✓" : "Копировать"}
+						{copied ? t("actionButton.copied") : t("actionButton.copy")}
 					</button>
 				</div>
 			</div>

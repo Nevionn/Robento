@@ -1,0 +1,22 @@
+{
+  "navigation": {
+    "grid": "Grid",
+    "settings": "Settings",
+    "hotkeys": "Hotkeys"
+  },
+  "settings": {
+    "general": "General",
+    "launchOnStartup": "Launch Robento on system startup",
+    "hideOnBlur": "Hide Robento when it loses focus",
+    "gameMode": "Game mode",
+    "language": "Application language",
+    "selectLanguage": "Select language",
+    "systemInfo": "System information",
+    "dataDirectory": "Data directory",
+    "loadingPath": "Loading path..."
+  },
+  "actionButton": {
+    "copy": "Copy",
+    "copied": "Copied ✓"
+  }
+}

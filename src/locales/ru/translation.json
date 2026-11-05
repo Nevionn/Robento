@@ -1,0 +1,22 @@
+{
+  "navigation": {
+    "grid": "Сетка",
+    "settings": "Настройки",
+    "hotkeys": "Клавиши"
+  },
+  "settings": {
+    "general": "Общее",
+    "launchOnStartup": "Запускать Robento при запуске системы",
+    "hideOnBlur": "Скрывать Robento, если потерян фокус",
+    "gameMode": "Игровой режим",
+    "language": "Язык приложения",
+    "selectLanguage": "Выберите язык",
+    "systemInfo": "Системная информация",
+    "dataDirectory": "Директория данных",
+    "loadingPath": "Загрузка пути..."
+  },
+  "actionButton": {
+    "copy": "Копировать",
+    "copied": "Скопировано ✓"
+  }
+}
