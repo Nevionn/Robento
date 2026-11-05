@@ -46,14 +46,14 @@ export function useBentoKeyboardShortcuts({
 			}
 
 			// Shift + G — создать группу
-			if (event.shiftKey && event.key.toLowerCase() === "g") {
+			if (event.shiftKey && event.code === "KeyG") {
 				event.preventDefault();
 				onCreateGroup();
 				return;
 			}
 
-			// Shift + R — удалить выбранный объект
-			if (event.shiftKey && event.key.toLowerCase() === "r") {
+			// Shift + R — удалить выбранную группу
+			if (event.shiftKey && event.code === "KeyR") {
 				event.preventDefault();
 
 				if (focusedGroupId) {
@@ -64,7 +64,7 @@ export function useBentoKeyboardShortcuts({
 			}
 
 			// Shift + F — добавить ярлык в активную группу
-			if (event.shiftKey && event.key.toLowerCase() === "f") {
+			if (event.shiftKey && event.code === "KeyF") {
 				if (!focusedGroupId || focusedShortcutId) {
 					return;
 				}
@@ -75,7 +75,7 @@ export function useBentoKeyboardShortcuts({
 			}
 
 			// R — редактировать выбранную группу
-			if (event.key.toLowerCase() === "r") {
+			if (event.code === "KeyR" && !event.shiftKey) {
 				if (!focusedGroupId || focusedShortcutId) {
 					return;
 				}
