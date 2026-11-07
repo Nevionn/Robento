@@ -1,6 +1,6 @@
 [package]
 name = "Robento"
-version = "0.1.0"
+version = "1.0.0"
 description = "Robento apps manager"
 authors = ["Nevionn"]
 repository = "https://github.com/Nevionn/Robento.git"
