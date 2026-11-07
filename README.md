@@ -1,5 +1,4 @@
 <!--<img src="./src/assets/banner.webp" alt="banner">-->
-<img src="./src/assets/preview/preview.webp" alt="preview">
 
 # Robento
 
@@ -9,6 +8,8 @@
 
 Меньше времени на поиск нужных приложений — больше порядка на рабочем пространстве.
 Поддержка языков: русский и английский.
+
+<img src="./src/assets/preview/preview.webp" alt="preview">
 
 # Горячие клавиши
 

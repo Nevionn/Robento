@@ -1,5 +1,4 @@
 <!-- <img src="./src/assets/banner.webp" alt="banner"> -->
-<img src="./src/assets/preview.webp" alt="preview">
 
 # Robento
 
@@ -10,6 +9,8 @@ Create groups, add shortcuts, customize icons, rearrange items with simple drag 
 Spend less time searching for applications and keep your workspace organized.
 
 Supported languages: English and Russian.
+
+<img src="./src/assets/preview/preview.webp" alt="preview">
 
 # Hotkeys
 
