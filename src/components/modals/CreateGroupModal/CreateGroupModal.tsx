@@ -48,6 +48,7 @@ export function CreateGroupModal({
 	if (!isOpen) return null;
 
 	const isEditMode = mode === "edit";
+	const hasChanges = title.trim() !== (groupToEdit?.title ?? "");
 
 	const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -140,7 +141,7 @@ export function CreateGroupModal({
 						<button
 							className={`${styles.button} ${styles.createButton}`}
 							type="submit"
-							disabled={isSubmitting}
+							disabled={isSubmitting || (isEditMode && !hasChanges)}
 						>
 							{isSubmitting
 								? t("actionButton.saving")
