@@ -1,5 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Pencil } from "lucide-react";
 
 import type { BentoGroup, Shortcut } from "../BentoGrid/BentoGrid";
 import ShortcutGrid from "../ShortcutGrid/ShortcutGrid";
@@ -11,6 +12,7 @@ interface Props {
 	onSelect: (id: string) => void;
 	onDeleteShortcut: (id: string) => Promise<void>;
 	onEditShortcut: (shortcut: Shortcut) => void;
+	onEditGroup: (id: string) => void;
 }
 
 /**
@@ -20,6 +22,7 @@ interface Props {
  * onSelect: Выбирает группу.
  * onDeleteShortcut: Удаляет ярлык.
  * onEditShortcut: Открывает редактирование ярлыка.
+ * onEditGroup: Открывает редактирование группы.
  */
 
 export default function BentoGroupCard({
@@ -28,6 +31,7 @@ export default function BentoGroupCard({
 	onSelect,
 	onDeleteShortcut,
 	onEditShortcut,
+	onEditGroup,
 }: Props) {
 	const {
 		setNodeRef,
@@ -57,6 +61,19 @@ export default function BentoGroupCard({
 		>
 			<header className={styles.header}>
 				<h2>{group.title}</h2>
+
+				<button
+					type="button"
+					className={styles.editButton}
+					aria-label="Редактировать группу"
+					title="Редактировать группу"
+					onClick={(event) => {
+						event.stopPropagation();
+						onEditGroup(group.id);
+					}}
+				>
+					<Pencil size={16} />
+				</button>
 			</header>
 
 			<div className={styles.shortcuts}>

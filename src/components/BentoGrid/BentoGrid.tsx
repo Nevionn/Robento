@@ -205,6 +205,7 @@ export default function BentoGrid() {
 								onSelect={setFocusedGroupId}
 								onDeleteShortcut={deleteShortcut}
 								onEditShortcut={setEditingShortcut}
+								onEditGroup={openEditModal}
 							/>
 						))}
 					</div>
