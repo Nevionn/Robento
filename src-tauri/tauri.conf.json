@@ -19,12 +19,12 @@
 
         "dragDropEnabled": true,
 
-        "decorations": true,
-        "transparent": false,
+        "decorations": false,
+        "transparent": true,
         "alwaysOnTop": false,
         "resizable": true,
         "shadow": false,
-        "skipTaskbar": false,
+        "skipTaskbar": true,
         "center": true
       }
     ],
