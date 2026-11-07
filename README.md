@@ -1,4 +1,4 @@
-<img src="./src/assets/banner.webp" alt="banner">
+<!--<img src="./src/assets/banner.webp" alt="banner">-->
 <img src="./src/assets/preview.webp" alt="preview">
 
 # Robento
@@ -8,6 +8,16 @@
 Создавайте группы, добавляйте ярлыки, настраивайте иконки, меняйте расположение элементов простым перетаскиванием и запускайте нужные программы в пару кликов.
 
 Меньше времени на поиск нужных приложений — больше порядка на рабочем пространстве.
+Поддержка языков: русский и английский.
+
+# Горячие клавиши
+
+| Действие                       | Сочетание клавиш |
+| :----------------------------- | :--------------: |
+| Создать новую группу           |   `Shift + G`    |
+| Редактировать выбранную группу |       `R`        |
+| Удалить выбранную группу       |   `Shift + R`    |
+| Открыть / свернуть окно        |  `Alt + Space`   |
 
 # Стек технологий
 
@@ -54,5 +64,5 @@ pnpm tauri dev
 
 # ССЫЛКИ ❤️
 
-[<img src="https://gitlab.com/prolinux410/owl_dots/-/raw/main/.img/git_tg.png?ref_type=heads" width="100">](https://t.me/ancient_nevionn)
-[<img src="https://gitlab.com/prolinux410/owl_dots/-/raw/main/.img/git_coffee.png?ref_type=heads" width="100">](https://www.donationalerts.com/r/nevion)
+[![Telegram](https://img.shields.io/badge/Telegram-Contact-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/ancient_nevionn)
+[![DonationAlerts](https://img.shields.io/badge/DonationAlerts-Support-orange?style=for-the-badge&logo=donate&logoColor=white)](https://www.donationalerts.com/r/nevion)
