@@ -138,7 +138,14 @@ export function CreateShortcutModal({
 	};
 
 	return (
-		<div className={styles.overlay}>
+		<div
+			className={styles.overlay}
+			onClick={(event) => {
+				if (event.target === event.currentTarget) {
+					handleClose();
+				}
+			}}
+		>
 			<div
 				className={styles.modal}
 				role="dialog"
