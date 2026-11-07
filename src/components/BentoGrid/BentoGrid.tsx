@@ -175,9 +175,11 @@ export default function BentoGrid() {
 		<div
 			className={groups.length > 0 ? styles.wrapper_withGroups : styles.wrapper}
 		>
-			<div className={styles.search}>
-				<BentoSearch value={searchQuery} onChange={setSearchQuery} />
-			</div>
+			{groups.length > 0 && (
+				<div className={styles.search}>
+					<BentoSearch value={searchQuery} onChange={setSearchQuery} />
+				</div>
+			)}
 
 			{groups.length === 0 && <Hotkeys />}
 
