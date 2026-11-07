@@ -115,11 +115,24 @@ pub fn pick_executable(app: tauri::AppHandle) -> Result<Option<Shortcut>, String
 
 #[tauri::command]
 pub fn launch_shortcut(target: String) -> Result<(), String> {
-    match Command::new(&target).spawn() {
+    let executable = Path::new(&target);
+
+    let working_dir = executable
+        .parent()
+        .ok_or_else(|| "Не удалось определить рабочую директорию".to_string())?;
+
+    let working_dir_wide: Vec<u16> = working_dir
+        .as_os_str()
+        .encode_wide()
+        .chain(std::iter::once(0))
+        .collect();
+
+    match Command::new(&target).current_dir(working_dir).spawn() {
         Ok(_) => Ok(()),
 
         Err(error) if error.raw_os_error() == Some(740) => {
-            let target_wide: Vec<u16> = std::ffi::OsStr::new(&target)
+            let target_wide: Vec<u16> = executable
+                .as_os_str()
                 .encode_wide()
                 .chain(std::iter::once(0))
                 .collect();
@@ -132,19 +145,16 @@ pub fn launch_shortcut(target: String) -> Result<(), String> {
                     verb.as_ptr(),
                     target_wide.as_ptr(),
                     std::ptr::null(),
-                    std::ptr::null(),
+                    working_dir_wide.as_ptr(),
                     SW_SHOWNORMAL,
                 )
             };
 
             if result as isize <= 32 {
-                let error = std::io::Error::last_os_error();
-
-                if error.raw_os_error() == Some(1223) {
-                    return Err("Запуск отменён пользователем".into());
-                }
-
-                return Err(error.to_string());
+                return Err(format!(
+                    "Не удалось запустить программу через UAC (код ошибки: {})",
+                    result as isize
+                ));
             }
 
             Ok(())
