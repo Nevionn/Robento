@@ -1,3 +1,4 @@
+import { getVersion } from "@tauri-apps/api/app";
 import { invoke } from "@tauri-apps/api/core";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { useEffect, useRef, useState } from "react";
@@ -16,6 +17,8 @@ import styles from "./Settings.module.css";
 
 export default function Settings() {
 	const { settings, updateGeneral } = useSettings();
+	const [appVersion, setAppVersion] = useState("");
+
 	const { t } = useTranslation();
 	const { currentLanguage, changeLanguage } = useLanguage();
 
@@ -33,6 +36,14 @@ export default function Settings() {
 			})
 			.catch((error: unknown) => {
 				console.error("Не удалось получить путь к БД:", error);
+			});
+
+		getVersion()
+			.then((version) => {
+				if (!cancelled) setAppVersion(version);
+			})
+			.catch((error: unknown) => {
+				console.error("Не удалось получить версию приложения:", error);
 			});
 
 		return () => {
@@ -132,7 +143,7 @@ export default function Settings() {
 				</div>
 			</div>
 
-			{/* Системная информция */}
+			{/* Системная информация */}
 			<div className={styles.section}>
 				<h2 className={styles.title}>{t("settings.systemInfo")}</h2>
 
@@ -154,6 +165,16 @@ export default function Settings() {
 					>
 						{copied ? t("actionButton.copied") : t("actionButton.copy")}
 					</button>
+				</div>
+
+				<div className={styles.versionRow}>
+					<span className={styles.versionLabel}>
+						{t("settings.appVersion")}
+					</span>
+
+					<span className={styles.appVersion}>
+						{appVersion || t("settings.loadingVersion")}
+					</span>
 				</div>
 			</div>
 		</section>

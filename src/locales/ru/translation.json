@@ -22,7 +22,9 @@
     "language": "Язык приложения",
     "selectLanguage": "Выберите язык",
     "systemInfo": "Системная информация",
-    "dataDirectory": "Директория данных",
+    "appVersion": "Версия приложения:",
+    "loadingVersion": "Загрузка версии...",
+    "dataDirectory": "Директория данных:",
     "loadingPath": "Загрузка пути..."
   },
   "Hotkeys": {

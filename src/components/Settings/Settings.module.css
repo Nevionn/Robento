@@ -140,6 +140,25 @@
 
 /* Системная информация */
 
+.versionRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.versionLabel {
+    color: var(--text-secondary);
+    font-family: var(--font-general);
+    font-size: 13px;
+}
+
+.appVersion {
+    color: var(--focus-indicator-focused);
+    font-family: var(--font-general);
+    font-size: 13px;
+}
+
 .pathLabel {
     margin-bottom: 8px;
 
