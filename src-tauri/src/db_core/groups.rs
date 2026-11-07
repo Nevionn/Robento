@@ -220,6 +220,31 @@ pub async fn delete_group(
 }
 
 #[tauri::command]
+pub async fn delete_all_groups(
+    app: tauri::AppHandle,
+    pool: State<'_, SqlitePool>,
+) -> Result<(), String> {
+    let mut tx = pool.inner().begin().await.map_err(|e| e.to_string())?;
+
+    sqlx::query("DELETE FROM Shortcuts")
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    sqlx::query("DELETE FROM Groups")
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    tx.commit().await.map_err(|e| e.to_string())?;
+
+    app.emit("all-groups-deleted", ())
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+#[tauri::command]
 pub async fn has_groups(pool: State<'_, SqlitePool>) -> Result<bool, String> {
     let exists: bool = sqlx::query_scalar(
         r#"

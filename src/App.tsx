@@ -6,7 +6,7 @@ import { SettingsProvider } from "./components/context/SettingsProvider";
 import NavBar from "./components/NavBar/NavBar";
 import View from "./components/View/View";
 
-import type { ViewName } from "./types/View";
+import type { ViewName } from "./shared/types/View";
 
 import { listenWindowOpened } from "./utils/listenWindowOpened";
 import { playStartSound } from "./utils/playStartSound";

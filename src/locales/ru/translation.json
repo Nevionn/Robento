@@ -1,0 +1,89 @@
+{
+  "navigation": {
+    "grid": "Сетка",
+    "settings": "Настройки",
+    "hotkeys": "Клавиши"
+  },
+  "BentoGrid": {
+    "loadError": "Не удалось загрузить группы: {{error}}",
+    "dragDisabled": "Перетаскивание отключено",
+    "emptySearch": "Ничего не найдено",
+    "selectGroupFirst": "Сначала выберите группу"
+  },
+  "BentoSearch": {
+    "placeholder": "Поиск приложений...",
+    "ariaLabel": "Поиск ярлыков"
+  },
+  "settings": {
+    "general": "Общее",
+    "launchOnStartup": "Запускать Robento при запуске системы",
+    "hideOnBlur": "Скрывать Robento, если потерян фокус",
+    "gameMode": "Игровой режим",
+    "language": "Язык приложения",
+    "selectLanguage": "Выберите язык",
+    "systemInfo": "Системная информация",
+    "appVersion": "Версия приложения:",
+    "loadingVersion": "Загрузка версии...",
+    "dataDirectory": "Директория данных:",
+    "loadingPath": "Загрузка пути..."
+  },
+  "Hotkeys": {
+    "createGroup": "Создать новую группу",
+    "editGroup": "Редактировать выбранную группу",
+    "deleteGroup": "Удалить выбранную группу",
+    "toggleWindow": "Открыть/свернуть окно"
+  },
+  "CreateGroupModal": {
+    "editTitle": "Редактирование группы",
+    "createTitle": "Создание группы",
+    "groupName": "Название группы",
+    "placeholder": "Введите название",
+    "emptyTitle": "Введите название группы",
+    "groupNotFound": "Группа не найдена",
+    "updateError": "Не удалось изменить название группы",
+    "createError": "Не удалось создать группу"
+  },
+  "CreateShortcutModal": {
+    "title": "Создание ярлыка",
+    "targetLabel": "Путь к исполняемому файлу",
+    "targetPlaceholder": "Путь",
+    "pickExecutable": "Выбрать исполняемый файл",
+    "nameLabel": "Название ярлыка (необязательно)",
+    "namePlaceholder": "Название",
+    "reserveIconLabel": "Резервная иконка (необязательно)",
+    "reserveIconPlaceholder": "Путь к файлу иконки",
+    "pickReserveIcon": "Выбрать файл резервной иконки",
+    "iconDialogTitle": "Выберите файл иконки",
+    "emptyTarget": "Укажите путь к исполняемому файлу",
+    "createError": "Не удалось создать ярлык"
+  },
+  "EditShortcutModal": {
+    "title": "Редактирование ярлыка",
+    "targetLabel": "Путь к исполняемому файлу",
+    "targetPlaceholder": "Путь",
+    "pickExecutable": "Выбрать исполняемый файл",
+    "nameLabel": "Название ярлыка",
+    "namePlaceholder": "Название",
+    "reserveIconLabel": "Резервная иконка (необязательно)",
+    "reserveIconPlaceholder": "Путь к файлу иконки",
+    "pickReserveIcon": "Выбрать резервную иконку",
+    "iconDialogTitle": "Выберите файл резервной иконки",
+    "emptyTarget": "Укажите путь к исполняемому файлу",
+    "emptyName": "Укажите название ярлыка",
+    "saveError": "Не удалось сохранить изменения ярлыка"
+  },
+  "ShortcutContextMenu": {
+    "launch": "Запустить",
+    "edit": "Редактировать",
+    "delete": "Удалить"
+  },
+  "actionButton": {
+    "copy": "Копировать",
+    "copied": "Скопировано ✓",
+    "saving": "Сохранение...",
+    "save": "Сохранить",
+    "pickingFile": "Выбор файла...",
+    "create": "Создать",
+    "cancel": "Отмена"
+  }
+}

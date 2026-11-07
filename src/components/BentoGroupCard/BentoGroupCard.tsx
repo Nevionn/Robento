@@ -1,94 +1,87 @@
-import { useDroppable } from "@dnd-kit/core";
-import type { BentoGroup } from "../BentoGrid/BentoGrid";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { Pencil } from "lucide-react";
+
+import type { BentoGroup, Shortcut } from "../BentoGrid/BentoGrid";
 import ShortcutGrid from "../ShortcutGrid/ShortcutGrid";
 import styles from "./BentoGroupCard.module.css";
 
 interface Props {
 	group: BentoGroup;
-	onTitleChange(id: string, title: string): void;
-	onSubmitGroup(id: string, title: string): void;
-	onGroupFocus(): void;
-	onDragOver(id: string): void;
-	onDragLeave(): void;
-	dropTargetGroup: string | null;
-
-	/* transition props */
-	onShortcutFocus(shortcutId: string | null): void;
-	searchQuery: string;
+	isSelected: boolean;
+	onSelect: (id: string) => void;
+	onDeleteShortcut: (id: string) => Promise<void>;
+	onEditShortcut: (shortcut: Shortcut) => void;
+	onEditGroup: (id: string) => void;
 }
 
 /**
- * Карточка Bento-группы.
+ * Карточка группы.
  *
  * Отвечает за:
- * - отображение заголовка группы;
- * - редактирование названия группы;
- * - отображение ярлыков группы.
- * - передачу фокуса выбранного ярлыка.
+ * onSelect: Выбирает группу.
+ * onDeleteShortcut: Удаляет ярлык.
+ * onEditShortcut: Открывает редактирование ярлыка.
+ * onEditGroup: Открывает редактирование группы.
  */
 
 export default function BentoGroupCard({
 	group,
-	searchQuery,
-	onTitleChange,
-	onSubmitGroup,
-	onGroupFocus,
-	onShortcutFocus,
-	onDragOver,
-	onDragLeave,
+	isSelected,
+	onSelect,
+	onDeleteShortcut,
+	onEditShortcut,
+	onEditGroup,
 }: Props) {
-	const { setNodeRef, isOver } = useDroppable({
-		id: `group-${group.id}`,
+	const {
+		setNodeRef,
+		transform,
+		transition,
+		isDragging,
+		attributes,
+		listeners,
+	} = useSortable({
+		id: group.id,
+		data: { type: "group" },
 	});
-
-	function handleSubmit() {
-		onSubmitGroup(group.id, group.title);
-	}
 
 	return (
 		<div
 			ref={setNodeRef}
-			tabIndex={0}
-			className={styles.card}
+			className={`${styles.card} ${isSelected ? styles.selected : ""}`}
 			style={{
-				background: isOver ? "#4a4c7d" : undefined,
+				transform: CSS.Transform.toString(transform),
+				transition,
+				zIndex: isDragging ? 2 : undefined,
+				opacity: isDragging ? 0.6 : 1,
 			}}
-			onClick={onGroupFocus}
-			onMouseEnter={() => {
-				onDragOver(group.id);
-			}}
-			onDragEnter={() => {
-				onDragOver(group.id);
-			}}
-			onDragLeave={onDragLeave}
+			{...attributes}
+			{...listeners}
+			onClick={() => onSelect(group.id)}
 		>
 			<header className={styles.header}>
-				{group.isEditing ? (
-					<input
-						autoFocus
-						value={group.title}
-						onChange={(event) => onTitleChange(group.id, event.target.value)}
-						onBlur={handleSubmit}
-						onKeyDown={(event) => {
-							if (event.key !== "Enter") {
-								return;
-							}
+				<h2>{group.title}</h2>
 
-							event.preventDefault();
-							handleSubmit();
-						}}
-					/>
-				) : (
-					<h2>{group.title}</h2>
-				)}
+				<button
+					type="button"
+					className={styles.editButton}
+					aria-label="Редактировать группу"
+					title="Редактировать группу"
+					onClick={(event) => {
+						event.stopPropagation();
+						onEditGroup(group.id);
+					}}
+				>
+					<Pencil size={16} />
+				</button>
 			</header>
 
 			<div className={styles.shortcuts}>
 				<ShortcutGrid
 					groupId={group.id}
 					shortcuts={group.shortcuts}
-					searchQuery={searchQuery}
-					onShortcutFocus={onShortcutFocus}
+					onDeleteShortcut={onDeleteShortcut}
+					onEditShortcut={onEditShortcut}
 				/>
 			</div>
 		</div>

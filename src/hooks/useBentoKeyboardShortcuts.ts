@@ -7,7 +7,6 @@ interface UseBentoKeyboardShortcutsParams {
 	onCreateGroup(): void;
 	onEditGroup(id: string): void;
 	onDeleteGroup(id: string): void;
-	onDeleteShortcut(id: string): void;
 	onAddShortcut(): void;
 }
 
@@ -16,7 +15,7 @@ interface UseBentoKeyboardShortcutsParams {
  *
  * Shift + G — создать новую группу.
  * R        — редактировать выбранную группу.
- * Shift + R — удалить выбранную группу / ярлык.
+ * Shift + R — удалить выбранную группу.
  * Shift + F — создать ярлык в активной группе.
  *
  * Хук не управляет состоянием групп.
@@ -29,7 +28,6 @@ export function useBentoKeyboardShortcuts({
 	onCreateGroup,
 	onEditGroup,
 	onDeleteGroup,
-	onDeleteShortcut,
 	onAddShortcut,
 }: UseBentoKeyboardShortcutsParams) {
 	useEffect(() => {
@@ -48,20 +46,15 @@ export function useBentoKeyboardShortcuts({
 			}
 
 			// Shift + G — создать группу
-			if (event.shiftKey && event.key.toLowerCase() === "g") {
+			if (event.shiftKey && event.code === "KeyG") {
 				event.preventDefault();
 				onCreateGroup();
 				return;
 			}
 
-			// Shift + R — удалить выбранный объект
-			if (event.shiftKey && event.key.toLowerCase() === "r") {
+			// Shift + R — удалить выбранную группу
+			if (event.shiftKey && event.code === "KeyR") {
 				event.preventDefault();
-
-				if (focusedShortcutId) {
-					onDeleteShortcut(focusedShortcutId);
-					return;
-				}
 
 				if (focusedGroupId) {
 					onDeleteGroup(focusedGroupId);
@@ -71,7 +64,7 @@ export function useBentoKeyboardShortcuts({
 			}
 
 			// Shift + F — добавить ярлык в активную группу
-			if (event.shiftKey && event.key.toLowerCase() === "f") {
+			if (event.shiftKey && event.code === "KeyF") {
 				if (!focusedGroupId || focusedShortcutId) {
 					return;
 				}
@@ -82,7 +75,7 @@ export function useBentoKeyboardShortcuts({
 			}
 
 			// R — редактировать выбранную группу
-			if (event.key.toLowerCase() === "r") {
+			if (event.code === "KeyR" && !event.shiftKey) {
 				if (!focusedGroupId || focusedShortcutId) {
 					return;
 				}
@@ -103,7 +96,6 @@ export function useBentoKeyboardShortcuts({
 		onCreateGroup,
 		onEditGroup,
 		onDeleteGroup,
-		onDeleteShortcut,
 		onAddShortcut,
 	]);
 }

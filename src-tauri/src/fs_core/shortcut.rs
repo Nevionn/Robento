@@ -1,7 +1,11 @@
 use serde::Serialize;
 
+use std::os::windows::ffi::OsStrExt;
 use std::path::Path;
 use std::process::Command;
+
+use windows_sys::Win32::UI::Shell::ShellExecuteW;
+use windows_sys::Win32::UI::WindowsAndMessaging::SW_SHOWNORMAL;
 
 use lnk::{encoding::WINDOWS_1252, ShellLink};
 
@@ -27,16 +31,24 @@ pub struct Shortcut {
  * - формирование структуры Shortcut.
  */
 
-fn shortcut_from_target(target: String, source: String) -> Shortcut {
+fn shortcut_from_target(
+    target: String,
+    source: String,
+    reserve_path2icon: Option<String>,
+) -> Shortcut {
     let name = Path::new(&target)
         .file_stem()
         .unwrap_or_default()
         .to_string_lossy()
         .to_string();
 
-    let icon = get_icon_base64_by_path(&target)
-        .ok()
-        .map(|base64| format!("data:image/png;base64,{}", base64));
+    let icon = match get_icon_base64_by_path(&target) {
+        Ok(base64) => Some(base64),
+        Err(_) => reserve_path2icon
+            .as_deref()
+            .and_then(|path| get_icon_base64_by_path(path).ok()),
+    }
+    .map(|base64| format!("data:image/png;base64,{base64}"));
 
     Shortcut {
         id: target.clone(),
@@ -63,7 +75,7 @@ pub fn parse_shortcut(path: String) -> Result<Shortcut, String> {
 
     let target = shortcut.link_target().unwrap_or_default();
 
-    Ok(shortcut_from_target(target, path))
+    Ok(shortcut_from_target(target, path, None))
 }
 
 /**
@@ -89,20 +101,65 @@ pub fn pick_executable(app: tauri::AppHandle) -> Result<Option<Shortcut>, String
 
     let target = path.to_string_lossy().to_string();
 
-    let shortcut = shortcut_from_target(target.clone(), target);
+    let shortcut = shortcut_from_target(target.clone(), target, None);
 
     Ok(Some(shortcut))
 }
 
 /**
- * Запускает исполняемый файл по указанному пути.
+ * Запускает исполняемый файл по указанному пути без UAC.
+ * Программы, требующие администратора, автоматически запускаются через runas.
  *
  * Создаёт новый процесс и возвращает результат его запуска.
  */
 
 #[tauri::command]
 pub fn launch_shortcut(target: String) -> Result<(), String> {
-    Command::new(&target).spawn().map_err(|e| e.to_string())?;
+    let executable = Path::new(&target);
 
-    Ok(())
+    let working_dir = executable
+        .parent()
+        .ok_or_else(|| "Не удалось определить рабочую директорию".to_string())?;
+
+    let working_dir_wide: Vec<u16> = working_dir
+        .as_os_str()
+        .encode_wide()
+        .chain(std::iter::once(0))
+        .collect();
+
+    match Command::new(&target).current_dir(working_dir).spawn() {
+        Ok(_) => Ok(()),
+
+        Err(error) if error.raw_os_error() == Some(740) => {
+            let target_wide: Vec<u16> = executable
+                .as_os_str()
+                .encode_wide()
+                .chain(std::iter::once(0))
+                .collect();
+
+            let verb: Vec<u16> = "runas".encode_utf16().chain(std::iter::once(0)).collect();
+
+            let result = unsafe {
+                ShellExecuteW(
+                    std::ptr::null_mut(),
+                    verb.as_ptr(),
+                    target_wide.as_ptr(),
+                    std::ptr::null(),
+                    working_dir_wide.as_ptr(),
+                    SW_SHOWNORMAL,
+                )
+            };
+
+            if result as isize <= 32 {
+                return Err(format!(
+                    "Не удалось запустить программу через UAC (код ошибки: {})",
+                    result as isize
+                ));
+            }
+
+            Ok(())
+        }
+
+        Err(error) => Err(error.to_string()),
+    }
 }

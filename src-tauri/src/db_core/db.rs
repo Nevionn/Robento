@@ -33,3 +33,14 @@ pub async fn init_db(app: &AppHandle) -> SqlitePool {
 
     pool
 }
+
+#[tauri::command]
+pub fn get_database_path(app: tauri::AppHandle) -> Result<String, String> {
+    let path = app
+        .path()
+        .app_data_dir()
+        .map_err(|e| e.to_string())?
+        .join("robento.db");
+
+    Ok(path.to_string_lossy().into_owned())
+}

@@ -1,0 +1,89 @@
+{
+  "navigation": {
+    "grid": "Grid",
+    "settings": "Settings",
+    "hotkeys": "Hotkeys"
+  },
+  "BentoGrid": {
+    "loadError": "Failed to load groups: {{error}}",
+    "dragDisabled": "Dragging is disabled",
+    "emptySearch": "Nothing found",
+    "selectGroupFirst": "Please select a group first"
+  },
+  "BentoSearch": {
+    "placeholder": "Search applications...",
+    "ariaLabel": "Search shortcuts"
+  },
+  "settings": {
+    "general": "General",
+    "launchOnStartup": "Launch Robento on system startup",
+    "hideOnBlur": "Hide Robento when it loses focus",
+    "gameMode": "Game mode",
+    "language": "Application language",
+    "selectLanguage": "Select language",
+    "systemInfo": "System information",
+    "appVersion": "Application version:",
+    "loadingVersion": "Loading version...",
+    "dataDirectory": "Data directory:",
+    "loadingPath": "Loading path..."
+  },
+  "Hotkeys": {
+    "createGroup": "Create a new group",
+    "editGroup": "Edit selected group",
+    "deleteGroup": "Delete selected group",
+    "toggleWindow": "Show/hide window"
+  },
+  "CreateGroupModal": {
+    "editTitle": "Edit group",
+    "createTitle": "Create group",
+    "groupName": "Group name",
+    "placeholder": "Enter a name",
+    "emptyTitle": "Enter a group name",
+    "groupNotFound": "Group not found",
+    "updateError": "Failed to update group name",
+    "createError": "Failed to create group"
+  },
+  "CreateShortcutModal": {
+    "title": "Create shortcut",
+    "targetLabel": "Executable file path",
+    "targetPlaceholder": "Path",
+    "pickExecutable": "Select executable file",
+    "nameLabel": "Shortcut name (optional)",
+    "namePlaceholder": "Name",
+    "reserveIconLabel": "Fallback icon (optional)",
+    "reserveIconPlaceholder": "Icon file path",
+    "pickReserveIcon": "Select fallback icon file",
+    "iconDialogTitle": "Select icon file",
+    "emptyTarget": "Please specify the executable file path",
+    "createError": "Failed to create shortcut"
+  },
+  "EditShortcutModal": {
+    "title": "Edit shortcut",
+    "targetLabel": "Executable file path",
+    "targetPlaceholder": "Path",
+    "pickExecutable": "Select executable file",
+    "nameLabel": "Shortcut name",
+    "namePlaceholder": "Name",
+    "reserveIconLabel": "Fallback icon (optional)",
+    "reserveIconPlaceholder": "Icon file path",
+    "pickReserveIcon": "Select fallback icon",
+    "iconDialogTitle": "Select fallback icon file",
+    "emptyTarget": "Please specify the executable file path",
+    "emptyName": "Please enter a shortcut name",
+    "saveError": "Failed to save shortcut changes"
+  },
+  "ShortcutContextMenu": {
+    "launch": "Launch",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "actionButton": {
+    "copy": "Copy",
+    "copied": "Copied ✓",
+    "saving": "Saving...",
+    "save": "Save",
+    "pickingFile": "Selecting file...",
+    "create": "Create",
+    "cancel": "Cancel"
+  }
+}

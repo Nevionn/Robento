@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 import styles from "./BentoSearch.module.css";
 
 interface BentoSearchProps {
@@ -10,6 +12,8 @@ interface BentoSearchProps {
  */
 
 export default function BentoSearch({ value, onChange }: BentoSearchProps) {
+	const { t } = useTranslation();
+
 	return (
 		<div className={styles.search}>
 			<input
@@ -17,8 +21,8 @@ export default function BentoSearch({ value, onChange }: BentoSearchProps) {
 				type="search"
 				value={value}
 				onChange={(event) => onChange(event.target.value)}
-				placeholder="Поиск приложений..."
-				aria-label="Search shortcuts"
+				placeholder={t("BentoSearch.placeholder")}
+				aria-label={t("BentoSearch.ariaLabel")}
 				autoComplete="off"
 				spellCheck={false}
 			/>

@@ -1,47 +1,44 @@
 import { rectSortingStrategy, SortableContext } from "@dnd-kit/sortable";
 
 import type { Shortcut } from "../BentoGrid/BentoGrid";
-
 import SortableShortcut from "../SortableShortcut/SortableShortcut";
 
 interface Props {
 	groupId: string;
 	shortcuts: Shortcut[];
-	searchQuery: string;
-	onShortcutFocus(shortcutId: string | null): void;
+	onDeleteShortcut: (id: string) => Promise<void>;
+	onEditShortcut: (shortcut: Shortcut) => void;
 }
 
 /**
- * Сетка ярлыков внутри одной Bento-группы.
+ * Сетка ярлыков.
  *
  * Отвечает за:
- * - отображение ярлыков;
- * - сортировку ярлыков внутри группы;
- * - передачу фокуса выбранного ярлыка.
- *
- * Перенос между группами обрабатывается
- * родительским DndContext.
+ * Отображение ярлыков группы.
+ * Передачу обработчиков удаления и редактирования.
  */
 
 export default function ShortcutGrid({
+	groupId,
 	shortcuts,
-	searchQuery,
-	onShortcutFocus,
+	onDeleteShortcut,
+	onEditShortcut,
 }: Props) {
 	return (
 		<SortableContext
-			items={shortcuts.map((item) => item.id)}
+			items={shortcuts.map((shortcut) => shortcut.id)}
 			strategy={rectSortingStrategy}
 		>
 			{shortcuts.map((shortcut) => (
 				<SortableShortcut
 					key={shortcut.id}
 					id={shortcut.id}
+					groupId={groupId}
 					name={shortcut.name}
 					icon={shortcut.icon}
 					target={shortcut.target}
-					searchQuery={searchQuery}
-					onShortcutFocus={onShortcutFocus}
+					onDelete={onDeleteShortcut}
+					onEdit={() => onEditShortcut(shortcut)}
 				/>
 			))}
 		</SortableContext>

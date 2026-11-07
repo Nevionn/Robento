@@ -1,8 +1,9 @@
 import { listen } from "@tauri-apps/api/event";
 import { useEffect, useState } from "react";
-
+import { useTranslation } from "react-i18next";
 import { useBentoGroups } from "../../hooks/useBentoGroups";
-import type { ViewName } from "../../types/View";
+import type { ViewName } from "../../shared/types/View";
+import WindowFocusIndicator from "../WindowFocusIndicator/WindowFocusIndicator";
 
 import styles from "./NavBar.module.css";
 
@@ -13,9 +14,9 @@ type NavBarProps = {
 
 /**
  * Панель навигации между основными представлениями приложения.
- * Сетка, настройки, горячие клавиши.
  *
  * Состояние синхронизируется с событиями создания и удаления групп.
+ * Сетка, настройки, горячие клавиши и индикатор фокуса окна.
  */
 
 export default function NavBar({ activeView, setActiveView }: NavBarProps) {
@@ -23,64 +24,87 @@ export default function NavBar({ activeView, setActiveView }: NavBarProps) {
 
 	const { checkHasGroups } = useBentoGroups({
 		setGroups: () => {},
-		setLayout: () => {},
 	});
+
+	const { t } = useTranslation();
 
 	useEffect(() => {
 		let unlistenCreated: (() => void) | undefined;
 		let unlistenDeleted: (() => void) | undefined;
+		let cancelled = false;
 
 		async function init() {
 			const updateHasGroups = async () => {
 				const result = await checkHasGroups();
 
-				setHasGroups(result);
+				if (!cancelled) {
+					setHasGroups(result);
+				}
 			};
 
-			await updateHasGroups();
+			try {
+				await updateHasGroups();
 
-			unlistenCreated = await listen("group-created", updateHasGroups);
-			unlistenDeleted = await listen("group-deleted", updateHasGroups);
+				if (cancelled) return;
+
+				unlistenCreated = await listen("group-created", updateHasGroups);
+
+				unlistenDeleted = await listen("group-deleted", updateHasGroups);
+
+				if (cancelled) {
+					unlistenCreated();
+					unlistenDeleted();
+				}
+			} catch (error) {
+				console.error("Не удалось инициализировать навигацию:", error);
+			}
 		}
 
 		void init();
 
 		return () => {
+			cancelled = true;
 			unlistenCreated?.();
 			unlistenDeleted?.();
 		};
 	}, [checkHasGroups]);
 
 	return (
-		<nav className={styles.nav}>
-			<button
-				className={`${styles.button} ${
-					activeView === "grid" ? styles.active : ""
-				}`}
-				onClick={() => setActiveView("grid")}
-			>
-				Сетка
-			</button>
-
-			<button
-				className={`${styles.button} ${
-					activeView === "settings" ? styles.active : ""
-				}`}
-				onClick={() => setActiveView("settings")}
-			>
-				Настройки
-			</button>
-
-			{hasGroups && (
+		<div className={styles.navWrapper}>
+			<nav className={styles.nav}>
 				<button
 					className={`${styles.button} ${
-						activeView === "hotkeys" ? styles.active : ""
+						activeView === "grid" ? styles.active : ""
 					}`}
-					onClick={() => setActiveView("hotkeys")}
+					onClick={() => setActiveView("grid")}
 				>
-					Клавиши
+					{t("navigation.grid")}
 				</button>
-			)}
-		</nav>
+
+				<button
+					className={`${styles.button} ${
+						activeView === "settings" ? styles.active : ""
+					}`}
+					onClick={() => setActiveView("settings")}
+				>
+					{t("navigation.settings")}
+				</button>
+
+				{hasGroups && (
+					<button
+						className={`${styles.button} ${
+							activeView === "hotkeys" ? styles.active : ""
+						}`}
+						onClick={() => setActiveView("hotkeys")}
+					>
+						{t("navigation.hotkeys")}
+					</button>
+				)}
+			</nav>
+
+			<div className={styles.focusIndicator}>
+				<WindowFocusIndicator />
+			</div>
+		</div>
 	);
 }

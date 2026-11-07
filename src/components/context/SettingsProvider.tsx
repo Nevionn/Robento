@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/correctness/useExhaustiveDependencies: <explanation> */
+/** biome-ignore-all lint/correctness/useExhaustiveDependencies: намеренное управление зависимостями useEffect */
 import { invoke } from "@tauri-apps/api/core";
 import type { ReactNode } from "react";
 import { createContext, useContext, useEffect, useState } from "react";

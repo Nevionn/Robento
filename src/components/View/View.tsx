@@ -1,4 +1,4 @@
-import type { ViewName } from "../../types/View";
+import type { ViewName } from "../../shared/types/View";
 
 import BentoGrid from "../BentoGrid/BentoGrid";
 import Hotkeys from "../Hotkeys/Hotkeys";

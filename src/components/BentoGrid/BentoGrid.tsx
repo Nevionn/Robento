@@ -1,29 +1,27 @@
-/** biome-ignore-all lint/correctness/useExhaustiveDependencies: intentional */
-import type { DragEndEvent } from "@dnd-kit/core";
 import {
-	closestCenter,
 	DndContext,
-	MouseSensor,
+	PointerSensor,
 	useSensor,
 	useSensors,
 } from "@dnd-kit/core";
-import { arrayMove } from "@dnd-kit/sortable";
-import { invoke } from "@tauri-apps/api/core";
-import { getCurrentWebview } from "@tauri-apps/api/webview";
-import { useEffect, useRef, useState } from "react";
+import { rectSortingStrategy, SortableContext } from "@dnd-kit/sortable";
+import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
-import type { Layout } from "react-grid-layout";
-import ReactGridLayout, { useContainerWidth } from "react-grid-layout";
-import "react-grid-layout/css/styles.css";
-
+import { useBentoDragAndDrop } from "../../hooks/useBentoDragAndDrop";
 import { useBentoGroups } from "../../hooks/useBentoGroups";
 import { useBentoKeyboardShortcuts } from "../../hooks/useBentoKeyboardShortcuts";
 import { useBentoShortcuts } from "../../hooks/useBentoShortcuts";
 
+import { filterBentoGroups } from "../../utils/filterBentoGroups";
+
 import BentoGroupCard from "../BentoGroupCard/BentoGroupCard";
 import Hotkeys from "../Hotkeys/Hotkeys";
+import { CreateGroupModal } from "../modals/CreateGroupModal/CreateGroupModal";
+import { CreateShortcutModal } from "../modals/CreateShortcutModal/CreateShortcutModal";
+import { EditShortcutModal } from "../modals/EditShortcutModal/EditShortcutModal";
+
 import styles from "./BentoGrid.module.css";
-import { generateLayout, updateLayoutHeight } from "./layout";
 import BentoSearch from "./Search/BentoSearch";
 
 export interface Shortcut {
@@ -31,6 +29,7 @@ export interface Shortcut {
 	name: string;
 	target: string;
 	source: string;
+	reserve_path2icon?: string | null;
 	icon: string | null;
 }
 
@@ -38,408 +37,242 @@ export interface BentoGroup {
 	id: string;
 	title: string;
 	shortcuts: Shortcut[];
-	isEditing?: boolean;
 }
 
-const initialGroups: BentoGroup[] = [];
-
 /**
- * Главный контейнер Bento-сетки.
+ * Сетка групп.
  *
- * Отвечает за:
- * - хранение групп в локальном state;
- * - первичную загрузку групп и ярлыков;
- * - отображение Bento-карточек;
- * - перемещение ярлыков;
- * - перенос ярлыков между группами;
- * - сортировку ярлыков внутри группы;
- * - локальное редактирование названия группы;
- * - перерасчёт высоты групп после изменения содержимого;
- * - обработку DnD файлов из ОС.
- *
- * CRUD-операции групп и ярлыков выполняются соответствующими хуками:
- * - useBentoGroups — группы;
- * - useBentoShortcuts — ярлыки.
+ * Загружает и отображает группы с ярлыками,
+ * управляет drag-and-drop и модальным окном создания группы.
  */
 
 export default function BentoGrid() {
-	const { width, containerRef, mounted } = useContainerWidth();
+	const { t } = useTranslation();
 
-	const [groups, setGroups] = useState<BentoGroup[]>(initialGroups);
+	const [groups, setGroups] = useState<BentoGroup[]>([]);
 	const [focusedGroupId, setFocusedGroupId] = useState<string | null>(null);
-	const [focusedShortcutId, setFocusedShortcutId] = useState<string | null>(
-		null,
-	);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 
-	const [dropTargetGroup, setDropTargetGroup] = useState<string | null>(null);
-	const [isDraggingShortcut, setIsDraggingShortcut] = useState(false);
-	const [isInitialLoading, setIsInitialLoading] = useState(true);
+	const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+	const [modalMode, setModalMode] = useState<"create" | "edit">("create");
+	const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+	const [editingShortcut, setEditingShortcut] = useState<Shortcut | null>(null);
+
+	const [isCreateShortcutModalOpen, setIsCreateShortcutModalOpen] =
+		useState(false);
 
 	const [searchQuery, setSearchQuery] = useState("");
+	const filteredGroups = filterBentoGroups(groups, searchQuery);
+	const isSearchActive = searchQuery.trim().length > 0;
 
-	const dropTargetGroupRef = useRef<string | null>(null);
-	const [layout, setLayout] = useState<Layout>(generateLayout(initialGroups));
+	const { loadGroups, createGroup, updateGroupTitle, deleteGroup } =
+		useBentoGroups({
+			setGroups,
+		});
+	const { loadShortcuts, createShortcut, updateShortcut, deleteShortcut } =
+		useBentoShortcuts({
+			setGroups,
+		});
 
-	const {
-		addGroupDraft,
-		submitGroupTitle,
-		deleteGroup,
-		updateGroupsOrder,
-		loadGroups,
-	} = useBentoGroups({
+	const { handleDragEnd, collisionDetection } = useBentoDragAndDrop({
+		groups,
 		setGroups,
-		setLayout,
 	});
 
-	const {
-		createShortcut,
-		loadShortcuts,
-		applyLoadedShortcuts,
-		updateShortcutsOrder,
-		deleteShortcut,
-	} = useBentoShortcuts({
-		setGroups,
-		setLayout,
+	const openCreateModal = useCallback(() => {
+		setModalMode("create");
+		setEditingGroupId(null);
+		setIsCreateModalOpen(true);
+	}, []);
+
+	const openEditModal = useCallback((id: string) => {
+		setModalMode("edit");
+		setEditingGroupId(id);
+		setIsCreateModalOpen(true);
+	}, []);
+
+	const closeCreateModal = useCallback(() => {
+		setIsCreateModalOpen(false);
+		setEditingGroupId(null);
+	}, []);
+
+	const openCreateShortcutModal = useCallback(() => {
+		if (!focusedGroupId) return;
+
+		setIsCreateShortcutModalOpen(true);
+	}, [focusedGroupId]);
+
+	const handleDeleteGroup = useCallback(
+		async (id: string) => {
+			try {
+				await deleteGroup(id);
+
+				setFocusedGroupId((currentId) => (currentId === id ? null : currentId));
+			} catch (error) {
+				console.error("Failed to delete group:", error);
+			}
+		},
+		[deleteGroup],
+	);
+
+	useBentoKeyboardShortcuts({
+		focusedGroupId,
+		focusedShortcutId: null,
+
+		onCreateGroup: openCreateModal,
+		onEditGroup: openEditModal,
+		onDeleteGroup: handleDeleteGroup,
+		onAddShortcut: openCreateShortcutModal,
 	});
 
-	/**
-	 * Первичная загрузка.
-	 *
-	 * loadGroups() -> loadShortcuts() -> applyLoadedShortcuts(savedShortcuts)
-	 *
-	 * ReactGridLayout НЕ монтируется до тех пор,
-	 * пока ярлыки не загружены и groups не получили
-	 * актуальное содержимое.
-	 */
+	const sensors = useSensors(
+		useSensor(PointerSensor, {
+			activationConstraint: { distance: 5 },
+		}),
+	);
 
 	useEffect(() => {
 		let cancelled = false;
 
-		async function initialize() {
+		async function start() {
 			try {
-				await loadGroups();
+				const [loadedGroups, shortcuts] = await Promise.all([
+					loadGroups(),
+					loadShortcuts(),
+				]);
 
-				if (cancelled) {
-					return;
+				if (cancelled) return;
+
+				const groupsWithShortcuts = loadedGroups.map((group) => ({
+					...group,
+					shortcuts: shortcuts
+						.filter((shortcut) => shortcut.group_id === group.id)
+						.sort((a, b) => a.sort_order - b.sort_order)
+						.map(({ id, name, target, source, reserve_path2icon, icon }) => ({
+							id,
+							name,
+							target,
+							source,
+							icon,
+							reserve_path2icon: reserve_path2icon ?? undefined,
+						})),
+				}));
+
+				setGroups(groupsWithShortcuts);
+			} catch (error) {
+				if (!cancelled) {
+					setError(String(error));
+					console.error("Failed to load groups and shortcuts:", error);
 				}
-
-				const savedShortcuts = await loadShortcuts();
-
-				if (cancelled) {
-					return;
-				}
-
-				applyLoadedShortcuts(savedShortcuts);
 			} finally {
 				if (!cancelled) {
-					setIsInitialLoading(false);
+					setLoading(false);
 				}
 			}
 		}
 
-		void initialize();
+		void start();
 
 		return () => {
 			cancelled = true;
 		};
-	}, [loadGroups, loadShortcuts, applyLoadedShortcuts]);
+	}, [loadGroups, loadShortcuts]);
 
-	/**
-	 * После первичной загрузки groups уже содержит ярлыки.
-	 *
-	 * Здесь строим layout только один раз из актуального
-	 * состояния.
-	 */
+	if (loading) return null;
 
-	useEffect(() => {
-		if (isInitialLoading) {
-			return;
-		}
-
-		setLayout((current) => updateLayoutHeight(groups, current));
-	}, [isInitialLoading]);
-
-	useBentoKeyboardShortcuts({
-		focusedGroupId,
-		focusedShortcutId,
-		onCreateGroup: addGroupDraft,
-		onEditGroup: startEditingGroup,
-		onDeleteGroup: deleteGroup,
-		onDeleteShortcut: deleteShortcut,
-		onAddShortcut: handleAddShortcut,
-	});
-
-	async function handleAddShortcut() {
-		if (!focusedGroupId) {
-			return;
-		}
-
-		const shortcut = await invoke<Shortcut | null>("pick_executable");
-
-		if (!shortcut) {
-			return;
-		}
-
-		await createShortcut(focusedGroupId, shortcut);
-	}
-
-	function handleGroupTitleChange(id: string, title: string) {
-		setGroups((prev) =>
-			prev.map((group) =>
-				group.id === id
-					? {
-							...group,
-							title,
-						}
-					: group,
-			),
+	if (error) {
+		return (
+			<div className={styles.wrapper}>
+				{t("BentoGrid.loadError", { error })}
+			</div>
 		);
 	}
-
-	function startEditingGroup(id: string) {
-		setGroups((prev) =>
-			prev.map((group) =>
-				group.id === id
-					? {
-							...group,
-							isEditing: true,
-						}
-					: group,
-			),
-		);
-	}
-
-	const sensors = useSensors(
-		useSensor(MouseSensor, {
-			activationConstraint: {
-				distance: 8,
-			},
-		}),
-	);
-
-	function handleShortcutDragEnd(event: DragEndEvent) {
-		const { active, over } = event;
-
-		if (!over) {
-			return;
-		}
-
-		let sourceId: string | undefined;
-		let targetId: string | undefined;
-
-		groups.forEach((group) => {
-			if (group.shortcuts.some((item) => item.id === active.id)) {
-				sourceId = group.id;
-			}
-		});
-
-		if (typeof over.id === "string" && over.id.startsWith("group-")) {
-			targetId = over.id.replace("group-", "");
-		} else {
-			groups.forEach((group) => {
-				if (group.shortcuts.some((item) => item.id === over.id)) {
-					targetId = group.id;
-				}
-			});
-		}
-
-		if (!sourceId || !targetId) {
-			return;
-		}
-
-		const copy = structuredClone(groups);
-
-		const source = copy.find((group) => group.id === sourceId);
-		const target = copy.find((group) => group.id === targetId);
-
-		if (!source || !target) {
-			return;
-		}
-
-		const oldIndex = source.shortcuts.findIndex(
-			(item) => item.id === active.id,
-		);
-
-		if (oldIndex === -1) {
-			return;
-		}
-
-		// Сортировка внутри группы.
-		if (sourceId === targetId) {
-			const newIndex = source.shortcuts.findIndex(
-				(item) => item.id === over.id,
-			);
-
-			if (newIndex === -1 || oldIndex === newIndex) {
-				return;
-			}
-
-			source.shortcuts = arrayMove(source.shortcuts, oldIndex, newIndex);
-		} else {
-			// Перенос между группами.
-			const [item] = source.shortcuts.splice(oldIndex, 1);
-
-			const targetIndex = target.shortcuts.findIndex(
-				(item) => item.id === over.id,
-			);
-
-			if (targetIndex === -1) {
-				target.shortcuts.push(item);
-			} else {
-				target.shortcuts.splice(targetIndex, 0, item);
-			}
-		}
-
-		setGroups(copy);
-		setLayout((current) => updateLayoutHeight(copy, current));
-
-		const shortcuts: {
-			id: string;
-			groupId: string;
-			sortOrder: number;
-		}[] = copy.flatMap((group: BentoGroup) =>
-			group.shortcuts.map((shortcut: Shortcut, index: number) => ({
-				id: shortcut.id,
-				groupId: group.id,
-				sortOrder: index,
-			})),
-		);
-
-		void updateShortcutsOrder(shortcuts);
-	}
-
-	useEffect(() => {
-		let unlisten: undefined | (() => void);
-
-		async function init() {
-			const webview = getCurrentWebview();
-
-			unlisten = await webview.onDragDropEvent(async (event) => {
-				switch (event.payload.type) {
-					case "over":
-						break;
-
-					case "leave":
-						setDropTargetGroup(null);
-						break;
-
-					case "drop": {
-						const targetGroupId = dropTargetGroupRef.current;
-
-						if (!targetGroupId) {
-							return;
-						}
-
-						const path = event.payload.paths[0];
-
-						const shortcut = await invoke<Shortcut>("parse_shortcut", {
-							path,
-						});
-
-						await createShortcut(targetGroupId, shortcut);
-						break;
-					}
-				}
-			});
-		}
-
-		void init();
-
-		return () => {
-			unlisten?.();
-		};
-	}, []);
 
 	return (
-		<section
-			ref={containerRef}
-			className={`${styles.wrapper} ${
-				groups.length > 0 ? styles.wrapper_withGroups : ""
-			}`}
+		<div
+			className={groups.length > 0 ? styles.wrapper_withGroups : styles.wrapper}
 		>
-			{isInitialLoading && null}
+			{groups.length > 0 && (
+				<div className={styles.search}>
+					<BentoSearch value={searchQuery} onChange={setSearchQuery} />
+				</div>
+			)}
 
-			{!isInitialLoading && groups.length === 0 && <Hotkeys />}
+			{groups.length === 0 && <Hotkeys />}
 
-			{!isInitialLoading && groups.length > 0 && mounted && (
-				<>
-					<div className={styles.search}>
-						<BentoSearch value={searchQuery} onChange={setSearchQuery} />
+			<DndContext
+				sensors={sensors}
+				collisionDetection={collisionDetection}
+				onDragEnd={isSearchActive ? undefined : handleDragEnd}
+			>
+				<SortableContext
+					items={filteredGroups.map((group) => group.id)}
+					strategy={rectSortingStrategy}
+				>
+					{isSearchActive && filteredGroups.length > 0 && (
+						<p className={styles.helperSearch}>{t("BentoGrid.dragDisabled")}</p>
+					)}
+
+					<div className={styles.bentoGrid}>
+						{filteredGroups.map((group) => (
+							<BentoGroupCard
+								key={group.id}
+								group={group}
+								isSelected={focusedGroupId === group.id}
+								onSelect={setFocusedGroupId}
+								onDeleteShortcut={deleteShortcut}
+								onEditShortcut={setEditingShortcut}
+								onEditGroup={openEditModal}
+							/>
+						))}
 					</div>
 
-					<DndContext
-						sensors={sensors}
-						collisionDetection={closestCenter}
-						onDragStart={() => setIsDraggingShortcut(true)}
-						onDragEnd={(event) => {
-							setIsDraggingShortcut(false);
-							handleShortcutDragEnd(event);
-						}}
-						onDragCancel={() => setIsDraggingShortcut(false)}
-					>
-						<ReactGridLayout
-							width={width}
-							layout={layout}
-							gridConfig={{
-								cols: 2,
-								rowHeight: 140,
-								margin: [16, 16],
-								containerPadding: [0, 0],
-							}}
-							dragConfig={{
-								enabled: !isDraggingShortcut,
-								cancel: ".shortcut-drag",
-							}}
-							resizeConfig={{
-								enabled: false,
-							}}
-							onLayoutChange={(next) => {
-								setLayout([...next]);
+					{searchQuery.trim() !== "" && filteredGroups.length === 0 && (
+						<p className={styles.emptySearch}>{t("BentoGrid.emptySearch")}</p>
+					)}
+				</SortableContext>
+			</DndContext>
 
-								const orderedGroupIds = [...next]
-									.sort((currentGroup, nextGroup) => {
-										if (currentGroup.y !== nextGroup.y) {
-											return currentGroup.y - nextGroup.y;
-										}
+			<CreateGroupModal
+				isOpen={isCreateModalOpen}
+				mode={modalMode}
+				groupToEdit={
+					groups.find((group) => group.id === editingGroupId) ?? null
+				}
+				onClose={closeCreateModal}
+				createGroup={async (title) => {
+					await createGroup(title);
+				}}
+				updateGroupTitle={async (id, title) => {
+					await updateGroupTitle(id, title);
+				}}
+			/>
 
-										return currentGroup.x - nextGroup.x;
-									})
-									.map((groupLayout) => groupLayout.i);
+			<CreateShortcutModal
+				isOpen={isCreateShortcutModalOpen}
+				onClose={() => setIsCreateShortcutModalOpen(false)}
+				onSave={async (data) => {
+					if (!focusedGroupId) {
+						throw new Error(t("BentoGrid.selectGroupFirst"));
+					}
 
-								void updateGroupsOrder(orderedGroupIds);
-							}}
-						>
-							{groups.map((group) => (
-								<div key={group.id}>
-									<BentoGroupCard
-										group={group}
-										searchQuery={searchQuery}
-										onTitleChange={handleGroupTitleChange}
-										onSubmitGroup={submitGroupTitle}
-										onGroupFocus={() => {
-											setFocusedGroupId(group.id);
-											setFocusedShortcutId(null);
-										}}
-										onShortcutFocus={(shortcutId) => {
-											setFocusedShortcutId(shortcutId);
-											setFocusedGroupId(group.id);
-										}}
-										onDragOver={(id) => {
-											dropTargetGroupRef.current = id;
-											setDropTargetGroup(id);
-										}}
-										onDragLeave={() => {
-											dropTargetGroupRef.current = null;
-											setDropTargetGroup(null);
-										}}
-										dropTargetGroup={dropTargetGroup}
-									/>
-								</div>
-							))}
-						</ReactGridLayout>
-					</DndContext>
-				</>
-			)}
-		</section>
+					await createShortcut(focusedGroupId, {
+						name: data.name || data.target.split(/[\\/]/).pop() || data.target,
+						target: data.target,
+						source: data.source,
+						icon: data.icon,
+						reserve_path2icon: data.reserve_path2icon || undefined,
+					});
+				}}
+			/>
+
+			<EditShortcutModal
+				isOpen={editingShortcut !== null}
+				shortcut={editingShortcut}
+				onClose={() => setEditingShortcut(null)}
+				onSave={updateShortcut}
+			/>
+		</div>
 	);
 }
