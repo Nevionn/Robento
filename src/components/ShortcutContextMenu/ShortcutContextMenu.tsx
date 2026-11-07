@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 
@@ -30,6 +30,44 @@ export default function ShortcutContextMenu({
 }: Props) {
 	const { t } = useTranslation();
 	const menuRef = useRef<HTMLDivElement>(null);
+	const [position, setPosition] = useState({ x, y });
+
+	useLayoutEffect(() => {
+		const menu = menuRef.current;
+		if (!menu) return;
+
+		const rect = menu.getBoundingClientRect();
+		const margin = 8;
+
+		const viewportWidth = document.documentElement.clientWidth;
+		const viewportHeight = document.documentElement.clientHeight;
+
+		let left = x;
+		let top = y;
+
+		// Если меню выходит за правую границу — открываем влево
+		if (left + rect.width > viewportWidth - margin) {
+			left = x - rect.width;
+		}
+
+		// Если меню выходит за нижнюю границу — открываем вверх
+		if (top + rect.height > viewportHeight - margin) {
+			top = y - rect.height;
+		}
+
+		// Не позволяем меню выходить за остальные границы
+		left = Math.max(
+			margin,
+			Math.min(left, viewportWidth - rect.width - margin),
+		);
+
+		top = Math.max(
+			margin,
+			Math.min(top, viewportHeight - rect.height - margin),
+		);
+
+		setPosition({ x: left, y: top });
+	}, [x, y]);
 
 	useEffect(() => {
 		function handlePointerDown(event: PointerEvent) {
@@ -61,7 +99,7 @@ export default function ShortcutContextMenu({
 			ref={menuRef}
 			className={styles.menu}
 			role="menu"
-			style={{ left: x, top: y }}
+			style={{ left: position.x, top: position.y }}
 			onContextMenu={(event) => event.preventDefault()}
 			onClick={(event) => event.stopPropagation()}
 		>
