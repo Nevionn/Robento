@@ -1,5 +1,5 @@
 <!--<img src="./src/assets/banner.webp" alt="banner">-->
-<img src="./src/assets/preview.webp" alt="preview">
+<img src="./src/assets/preview/preview.webp" alt="preview">
 
 # Robento
 
