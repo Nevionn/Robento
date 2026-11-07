@@ -137,11 +137,29 @@ export default function BentoGrid() {
 
 		async function start() {
 			try {
-				await loadGroups();
+				const [loadedGroups, shortcuts] = await Promise.all([
+					loadGroups(),
+					loadShortcuts(),
+				]);
 
 				if (cancelled) return;
 
-				await loadShortcuts();
+				const groupsWithShortcuts = loadedGroups.map((group) => ({
+					...group,
+					shortcuts: shortcuts
+						.filter((shortcut) => shortcut.group_id === group.id)
+						.sort((a, b) => a.sort_order - b.sort_order)
+						.map(({ id, name, target, source, reserve_path2icon, icon }) => ({
+							id,
+							name,
+							target,
+							source,
+							icon,
+							reserve_path2icon: reserve_path2icon ?? undefined,
+						})),
+				}));
+
+				setGroups(groupsWithShortcuts);
 			} catch (error) {
 				if (!cancelled) {
 					setError(String(error));

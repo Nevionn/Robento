@@ -31,14 +31,12 @@ export function useBentoGroups({ setGroups }: UseBentoGroupsParams) {
 	const loadGroups = useCallback(async () => {
 		const savedGroups = await invoke<GroupDto[]>("get_groups");
 
-		const loadedGroups: BentoGroup[] = savedGroups.map((group) => ({
+		return savedGroups.map((group) => ({
 			id: group.id,
 			title: group.title,
 			shortcuts: [],
 		}));
-
-		setGroups(loadedGroups);
-	}, [setGroups]);
+	}, []);
 
 	const createGroup = useCallback(
 		async (title: string) => {

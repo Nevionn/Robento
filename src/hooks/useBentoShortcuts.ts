@@ -70,25 +70,8 @@ export function useBentoShortcuts({ setGroups }: UseBentoShortcutsParams) {
 	);
 
 	const loadShortcuts = useCallback(async () => {
-		const shortcuts = await invoke<SavedShortcut[]>("get_shortcuts");
-
-		setGroups((prev) =>
-			prev.map((group) => ({
-				...group,
-				shortcuts: shortcuts
-					.filter((shortcut) => shortcut.group_id === group.id)
-					.sort((a, b) => a.sort_order - b.sort_order)
-					.map(({ id, name, target, source, reserve_path2icon, icon }) => ({
-						id,
-						name,
-						target,
-						source,
-						reserve_path2icon: reserve_path2icon ?? undefined,
-						icon,
-					})),
-			})),
-		);
-	}, [setGroups]);
+		return await invoke<SavedShortcut[]>("get_shortcuts");
+	}, []);
 
 	const updateShortcut = useCallback(
 		async (
