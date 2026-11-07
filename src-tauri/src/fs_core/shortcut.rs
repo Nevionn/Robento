@@ -1,7 +1,11 @@
 use serde::Serialize;
 
+use std::os::windows::ffi::OsStrExt;
 use std::path::Path;
 use std::process::Command;
+
+use windows_sys::Win32::UI::Shell::ShellExecuteW;
+use windows_sys::Win32::UI::WindowsAndMessaging::SW_SHOWNORMAL;
 
 use lnk::{encoding::WINDOWS_1252, ShellLink};
 
@@ -103,14 +107,49 @@ pub fn pick_executable(app: tauri::AppHandle) -> Result<Option<Shortcut>, String
 }
 
 /**
- * Запускает исполняемый файл по указанному пути.
+ * Запускает исполняемый файл по указанному пути без UAC.
+ * Программы, требующие администратора, автоматически запускаются через runas.
  *
  * Создаёт новый процесс и возвращает результат его запуска.
  */
 
 #[tauri::command]
 pub fn launch_shortcut(target: String) -> Result<(), String> {
-    Command::new(&target).spawn().map_err(|e| e.to_string())?;
+    match Command::new(&target).spawn() {
+        Ok(_) => Ok(()),
 
-    Ok(())
+        Err(error) if error.raw_os_error() == Some(740) => {
+            let target_wide: Vec<u16> = std::ffi::OsStr::new(&target)
+                .encode_wide()
+                .chain(std::iter::once(0))
+                .collect();
+
+            let verb: Vec<u16> = "runas".encode_utf16().chain(std::iter::once(0)).collect();
+
+            let result = unsafe {
+                ShellExecuteW(
+                    std::ptr::null_mut(),
+                    verb.as_ptr(),
+                    target_wide.as_ptr(),
+                    std::ptr::null(),
+                    std::ptr::null(),
+                    SW_SHOWNORMAL,
+                )
+            };
+
+            if result as isize <= 32 {
+                let error = std::io::Error::last_os_error();
+
+                if error.raw_os_error() == Some(1223) {
+                    return Err("Запуск отменён пользователем".into());
+                }
+
+                return Err(error.to_string());
+            }
+
+            Ok(())
+        }
+
+        Err(error) => Err(error.to_string()),
+    }
 }

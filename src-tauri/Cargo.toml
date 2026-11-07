@@ -27,3 +27,7 @@ lnk = "0.6.4"
 windows-icons = "0.3.0"
 uuid = { version = "1", features = ["v6"] }
 winreg = "0.56.0"
+windows-sys = { version = "0.59", features = [
+    "Win32_UI_Shell",
+    "Win32_UI_WindowsAndMessaging",
+] }

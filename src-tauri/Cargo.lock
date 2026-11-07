@@ -19,6 +19,7 @@ dependencies = [
  "tauri-plugin-sql",
  "uuid",
  "windows-icons",
+ "windows-sys 0.59.0",
  "winreg 0.56.0",
 ]
 
