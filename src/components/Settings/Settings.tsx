@@ -1,10 +1,12 @@
 import { getVersion } from "@tauri-apps/api/app";
 import { invoke } from "@tauri-apps/api/core";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
+import { openUrl } from "@tauri-apps/plugin-opener";
+import { GitBranch } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-
 import { useLanguage } from "../../i18n/useLanguage";
+import { REP_URL } from "../../shared/link/link";
 import { useSettings } from "../context/SettingsProvider";
 
 import styles from "./Settings.module.css";
@@ -175,6 +177,21 @@ export default function Settings() {
 					<span className={styles.appVersion}>
 						{appVersion || t("settings.loadingVersion")}
 					</span>
+
+					<a
+						className={styles.githubLink}
+						href={REP_URL}
+						onClick={(event) => {
+							event.preventDefault();
+							void openUrl(REP_URL).catch(console.error);
+						}}
+						target="_blank"
+						rel="noopener noreferrer"
+						aria-label="GitHub repository"
+						title="GitHub"
+					>
+						<GitBranch size={16} />
+					</a>
 				</div>
 			</div>
 		</section>

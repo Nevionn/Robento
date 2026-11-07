@@ -167,6 +167,17 @@
     font-size: 13px;
 }
 
+.githubLink {
+    display: flex;
+    align-items: center;
+    color: var(--text-secondary);
+    transition: color 0.2s ease;
+}
+
+.githubLink:hover {
+    color: var(--text-primary);
+}
+
 .pathRow {
     display: flex;
     align-items: center;
